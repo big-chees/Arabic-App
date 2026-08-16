@@ -250,6 +250,56 @@
 
   /* ---------- quiz ---------- */
   .quiz-wrap{max-width:520px; margin:0 auto; text-align:center;}
+  .quiz-top-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .quiz-top-row .quiz-score{margin-bottom:0; text-align:left;}
+  .quiz-back-btn{font-size:12px; padding:7px 14px; flex-shrink:0;}
+  .quiz-top-actions{display:flex; gap:8px; align-items:center; flex-shrink:0;}
+  .practice-top-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px;}
+  .practice-top-row .fc-meta{margin-bottom:0;}
+  .exit-btn{
+    background:transparent; border:1px solid var(--border); color:var(--text-muted);
+    padding:6px 13px; border-radius:999px; font-size:11.5px; cursor:pointer; transition:all .15s ease; flex-shrink:0;
+  }
+  .exit-btn:hover{border-color:var(--danger); color:var(--danger);}
+
+  /* ---------- practice timer (persistent floating widget) ---------- */
+  .timer-widget{position:fixed; bottom:22px; right:20px; z-index:200; display:flex; flex-direction:column; align-items:flex-end; gap:10px;}
+  .timer-fab{
+    width:58px; height:58px; border-radius:50%; background:var(--gold); color:var(--ink); border:none;
+    font-size:19px; font-weight:700; cursor:pointer; box-shadow:0 4px 18px rgba(0,0,0,0.45);
+    display:flex; align-items:center; justify-content:center; transition:all .2s ease; font-family:'Fraunces',serif;
+  }
+  .timer-fab:hover{transform:scale(1.06);}
+  .timer-fab.running{background:var(--teal); animation:timerPulse 2s infinite;}
+  .timer-fab.ringing{background:var(--danger); animation:timerShake .4s infinite;}
+  @keyframes timerPulse{0%,100%{box-shadow:0 4px 18px rgba(47,166,160,0.45);}50%{box-shadow:0 4px 26px rgba(47,166,160,0.85);}}
+  @keyframes timerShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+  .timer-panel{
+    background:var(--panel-2); border:1px solid var(--gold); border-radius:12px; padding:20px; width:230px;
+    box-shadow:0 10px 36px rgba(0,0,0,0.55);
+  }
+  .timer-panel-title{font-family:'Fraunces',serif; font-weight:600; font-size:14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
+  .timer-panel-close{background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; padding:0;}
+  .timer-display{font-family:'Fraunces',serif; font-size:34px; text-align:center; color:var(--gold-soft); margin-bottom:16px; letter-spacing:1px;}
+  .timer-presets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;}
+  .timer-preset{
+    flex:1; min-width:36px; background:transparent; border:1px solid var(--border); color:var(--text-muted);
+    padding:7px 4px; border-radius:6px; font-size:11px; cursor:pointer; transition:all .15s ease;
+  }
+  .timer-preset:hover, .timer-preset.active{border-color:var(--gold); color:var(--gold-soft);}
+  .timer-custom{display:flex; gap:6px; margin-bottom:16px;}
+  .timer-custom input{
+    flex:1; min-width:0; background:var(--ink); border:1px solid var(--border); color:var(--text);
+    padding:7px 9px; border-radius:6px; font-size:12px;
+  }
+  .timer-custom .btn{padding:7px 12px; font-size:11px; flex-shrink:0;}
+  .timer-controls{display:flex; gap:8px;}
+  .timer-controls .btn{flex:1; font-size:12px; padding:9px;}
+  @media (max-width:640px){
+    .timer-widget{bottom:16px; right:14px;}
+    .timer-fab{width:52px; height:52px; font-size:17px;}
+  }
+
   .quiz-score{font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:18px;}
   .quiz-word{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:56px; color:var(--gold-soft); margin-bottom:6px; direction:rtl;}
   .quiz-translit{font-family:'Fraunces',serif; font-style:italic; color:var(--text-muted); margin-bottom:30px;}
@@ -1811,6 +1861,151 @@ const DATA = {
       ]}
     ]},
 
+    { id:"childrens-first-words", en:"Children's First Words", ar:"كلمات الأطفال الأولى", icon:"🧸", diff:"easy", subs:[
+      { id:"toys-playtime", en:"Toys & Playtime", ar:"الألعاب وأوقات اللعب", words:[
+        {a:"كرة", t:"kura", e:"ball", p:"n", s:"الولد يلعب بالكرة.", x:"The boy plays with the ball."},
+        {a:"مكعبات", t:"moka'abat", e:"building blocks", p:"n", s:"تبني الطفلة برجاً من المكعبات.", x:"The little girl builds a tower from blocks."},
+        {a:"أرجوحة", t:"urjuha", e:"swing", p:"n", s:"الأطفال يلعبون على الأرجوحة.", x:"The children play on the swing."},
+        {a:"زحليقة", t:"zahliqa", e:"slide", p:"n", s:"نزل الولد من الزحليقة بسرعة.", x:"The boy went down the slide quickly."},
+        {a:"بالون", t:"balon", e:"balloon", p:"n", s:"اشترت أمي بالوناً أحمر.", x:"My mom bought a red balloon."},
+        {a:"طائرة ورقية", t:"ta'ira waraqiyya", e:"kite", p:"n", s:"نطير الطائرة الورقية في الحديقة.", x:"We fly the kite in the park."},
+        {a:"دبدوب", t:"dubdub", e:"teddy bear", p:"n", s:"تنام البنت مع دبدوبها كل ليلة.", x:"The girl sleeps with her teddy bear every night."},
+        {a:"أحجية", t:"uhjiya", e:"puzzle", p:"n", s:"حل الطفل الأحجية بمفرده.", x:"The child solved the puzzle by himself."},
+        {a:"حبل القفز", t:"habl al-qafz", e:"jump rope", p:"n", s:"تلعب الفتيات بحبل القفز.", x:"The girls play with the jump rope."},
+        {a:"دراجة ثلاثية", t:"darraja thulathiyya", e:"tricycle", p:"n", s:"يركب أخي الصغير دراجته الثلاثية.", x:"My little brother rides his tricycle."},
+        {a:"فقاعات صابون", t:"fuqa'at sabun", e:"bubbles", p:"n", s:"أحب نفخ فقاعات الصابون.", x:"I love blowing soap bubbles."},
+        {a:"شاطئ", t:"shati'", e:"beach", p:"n", s:"قضينا يوماً جميلاً على الشاطئ.", x:"We spent a beautiful day at the beach."},
+        {a:"دلو", t:"dalw", e:"bucket", p:"n", s:"ملأ الطفل الدلو بالرمل.", x:"The child filled the bucket with sand."},
+        {a:"لعبة الغميضة", t:"lu'bat al-ghumayda", e:"hide and seek", p:"n", s:"يحب الأطفال لعبة الغميضة.", x:"Children love hide and seek."},
+        {a:"نرد", t:"nard", e:"dice", p:"n", s:"رمى اللاعب النرد.", x:"The player rolled the dice."},
+        {a:"شطرنج", t:"shatranj", e:"chess", p:"n", s:"تعلم أخي لعب الشطرنج.", x:"My brother learned to play chess."},
+        {a:"عربة أطفال", t:"arabat atfal", e:"baby stroller", p:"n", s:"تدفع الأم عربة الأطفال.", x:"The mother pushes the baby stroller."},
+        {a:"حضانة", t:"hadana", e:"daycare / nursery", p:"n", s:"يذهب أخي الصغير إلى الحضانة.", x:"My little brother goes to daycare."},
+        {a:"روضة أطفال", t:"rawdat atfal", e:"kindergarten", p:"n", s:"بدأت أختي روضة الأطفال هذا العام.", x:"My sister started kindergarten this year."},
+        {a:"ملعب", t:"mal'ab", e:"playground", p:"n", s:"الأطفال يلعبون في الملعب بعد المدرسة.", x:"The children play in the playground after school."}
+      ]},
+      { id:"opposites", en:"Opposites", ar:"الأضداد", words:[
+        {a:"ضعيف", t:"da'if", e:"weak", p:"adj", s:"الرضيع ضعيف وصغير.", x:"The baby is weak and small."},
+        {a:"مفتوح", t:"maftuh", e:"open", p:"adj", s:"الباب مفتوح الآن.", x:"The door is open now."},
+        {a:"مغلق", t:"mughlaq", e:"closed", p:"adj", s:"المتجر مغلق يوم الجمعة.", x:"The store is closed on Friday."},
+        {a:"بعيد", t:"ba'id", e:"far", p:"adj", s:"بيتهم بعيد عن المدرسة.", x:"Their house is far from school."},
+        {a:"قريب", t:"qarib", e:"near", p:"adj", s:"المكتبة قريبة من هنا.", x:"The library is near here."},
+        {a:"مرتفع", t:"murtafi'", e:"high", p:"adj", s:"الجبل مرتفع جداً.", x:"The mountain is very high."},
+        {a:"منخفض", t:"munkhafid", e:"low", p:"adj", s:"السقف منخفض في هذه الغرفة.", x:"The ceiling is low in this room."},
+        {a:"مضيء", t:"mudi'", e:"bright / lit", p:"adj", s:"الغرفة مضيئة بالشمس.", x:"The room is bright with sunlight."},
+        {a:"مظلم", t:"muzlim", e:"dark", p:"adj", s:"الطريق مظلم في الليل.", x:"The road is dark at night."},
+        {a:"مبكر", t:"mubakkir", e:"early", p:"adj", s:"استيقظت مبكراً اليوم.", x:"I woke up early today."},
+        {a:"متأخر", t:"muta'akhkhir", e:"late", p:"adj", s:"وصل الحافلة متأخراً.", x:"The bus arrived late."},
+        {a:"حلو", t:"hulw", e:"sweet", p:"adj", s:"هذا الكعك حلو جداً.", x:"This cake is very sweet."},
+        {a:"مر", t:"murr", e:"bitter", p:"adj", s:"الدواء طعمه مر.", x:"The medicine tastes bitter."},
+        {a:"حقيقي", t:"haqiqi", e:"real", p:"adj", s:"هذا ذهب حقيقي.", x:"This is real gold."},
+        {a:"مزيف", t:"muzayyaf", e:"fake", p:"adj", s:"اكتشفوا أن النقود مزيفة.", x:"They discovered the money was fake."},
+        {a:"طازج", t:"tazij", e:"fresh", p:"adj", s:"الخبز طازج هذا الصباح.", x:"The bread is fresh this morning."},
+        {a:"فاسد", t:"fasid", e:"spoiled / rotten", p:"adj", s:"هذا الحليب فاسد.", x:"This milk is spoiled."},
+        {a:"ممنوع", t:"mamnu'", e:"forbidden", p:"adj", s:"التدخين ممنوع هنا.", x:"Smoking is forbidden here."},
+        {a:"مسموح", t:"masmuh", e:"allowed", p:"adj", s:"الدخول مسموح للجميع.", x:"Entry is allowed for everyone."},
+        {a:"كامل", t:"kamil", e:"complete / whole", p:"adj", s:"قرأت الكتاب كاملاً.", x:"I read the whole book."}
+      ]}
+    ]},
+
+    { id:"family-care-classroom", en:"Family, Care & Classroom", ar:"العائلة والرعاية والصف", icon:"🏫", diff:"easy",
+      note:"The 200-word core set covered immediate family (parents, siblings, grandparents), but left out extended family and the everyday commands used with children — genuinely common gaps for both young learners and anyone learning family vocabulary for the first time. Filling those in here.",
+      subs:[
+      { id:"extended-family", en:"Extended Family", ar:"العائلة الممتدة", words:[
+        {a:"عم", t:"amm", e:"paternal uncle", p:"n", s:"عمي يعيش في مدينة أخرى.", x:"My uncle lives in another city."},
+        {a:"عمة", t:"amma", e:"paternal aunt", p:"n", s:"عمتي تطبخ طعاماً لذيذاً.", x:"My aunt cooks delicious food."},
+        {a:"خال", t:"khal", e:"maternal uncle", p:"n", s:"خالي أصغر من أمي.", x:"My maternal uncle is younger than my mother."},
+        {a:"خالة", t:"khala", e:"maternal aunt", p:"n", s:"زارتنا خالتي أمس.", x:"My maternal aunt visited us yesterday."},
+        {a:"ابن عم", t:"ibn amm", e:"male cousin", p:"n", s:"ابن عمي يدرس الطب.", x:"My cousin studies medicine."},
+        {a:"بنت عم", t:"bint amm", e:"female cousin", p:"n", s:"بنت عمي في مثل عمري.", x:"My cousin is my age."},
+        {a:"حفيد", t:"hafid", e:"grandson", p:"n", s:"جدي فخور بحفيده.", x:"My grandfather is proud of his grandson."},
+        {a:"حفيدة", t:"hafida", e:"granddaughter", p:"n", s:"الحفيدة تشبه جدتها.", x:"The granddaughter resembles her grandmother."},
+        {a:"عائلة", t:"a'ila", e:"family", p:"n", s:"عائلتي كبيرة ومتحابة.", x:"My family is big and loving."},
+        {a:"توأم", t:"taw'am", e:"twin", p:"n", s:"لدي أخ توأم.", x:"I have a twin brother."},
+        {a:"رضيع", t:"radi'", e:"infant", p:"n", s:"الرضيع ينام معظم اليوم.", x:"The infant sleeps most of the day."},
+        {a:"مراهق", t:"murahiq", e:"teenager", p:"n", s:"المراهقون يحبون الموسيقى.", x:"Teenagers love music."},
+        {a:"بالغ", t:"baligh", e:"adult", p:"n", s:"يجب أن يرافقك بالغ.", x:"An adult must accompany you."},
+        {a:"أقارب", t:"aqarib", e:"relatives", p:"n", s:"جاء كل الأقارب إلى الحفلة.", x:"All the relatives came to the party."},
+        {a:"حماة", t:"hama", e:"mother-in-law", p:"n", s:"حماتي امرأة لطيفة.", x:"My mother-in-law is a kind woman."},
+        {a:"حمو", t:"hamu", e:"father-in-law", p:"n", s:"حموي يعمل مهندساً.", x:"My father-in-law works as an engineer."},
+        {a:"صهر", t:"sihr", e:"son-in-law", p:"n", s:"صهري يحب عائلتنا.", x:"My son-in-law loves our family."},
+        {a:"كنة", t:"kinna", e:"daughter-in-law", p:"n", s:"كنتي تساعد والدتي.", x:"My daughter-in-law helps my mother."},
+        {a:"نسب", t:"nasab", e:"lineage / ancestry", p:"n", s:"يفتخر بنسبه العريق.", x:"He is proud of his ancient lineage."},
+        {a:"يتيم", t:"yatim", e:"orphan", p:"n", s:"نساعد الأيتام في مجتمعنا.", x:"We help orphans in our community."}
+      ]},
+      { id:"classroom-commands", en:"Basic Commands & Classroom Phrases", ar:"أوامر أساسية وعبارات صفية", words:[
+        {a:"اجلس", t:"ijlis", e:"Sit down!", p:"v", s:"قال المعلم: اجلس من فضلك.", x:"The teacher said: sit down, please."},
+        {a:"قف", t:"qif", e:"Stand up!", p:"v", s:"قف عندما يدخل المعلم.", x:"Stand up when the teacher enters."},
+        {a:"انظر", t:"unzur", e:"Look!", p:"v", s:"انظر إلى السبورة.", x:"Look at the board."},
+        {a:"استمع", t:"istami'", e:"Listen!", p:"v", s:"استمع جيداً للدرس.", x:"Listen well to the lesson."},
+        {a:"اسكت", t:"uskut", e:"Be quiet!", p:"v", s:"اسكت من فضلك، الجميع يقرأ.", x:"Be quiet please, everyone is reading."},
+        {a:"كرر", t:"karrir", e:"Repeat!", p:"v", s:"كرر الجملة بعدي.", x:"Repeat the sentence after me."},
+        {a:"افتح كتابك", t:"iftah kitabak", e:"Open your book", p:"phrase", s:"افتح كتابك على صفحة عشرة.", x:"Open your book to page ten."},
+        {a:"أغلق كتابك", t:"aghliq kitabak", e:"Close your book", p:"phrase", s:"أغلق كتابك، حان وقت الامتحان.", x:"Close your book, it's exam time."},
+        {a:"ارفع يدك", t:"irfa' yadak", e:"Raise your hand", p:"phrase", s:"ارفع يدك إذا كان عندك سؤال.", x:"Raise your hand if you have a question."},
+        {a:"انتبه", t:"intabih", e:"Pay attention!", p:"v", s:"انتبه، هذا الجزء مهم.", x:"Pay attention, this part is important."},
+        {a:"تعال هنا", t:"ta'al huna", e:"Come here", p:"phrase", s:"تعال هنا يا ولدي.", x:"Come here, my son."},
+        {a:"اذهب", t:"idhhab", e:"Go!", p:"v", s:"اذهب إلى غرفتك الآن.", x:"Go to your room now."},
+        {a:"انتظر لحظة", t:"intazir lahza", e:"Wait a moment", p:"phrase", s:"انتظر لحظة، سأنتهي قريباً.", x:"Wait a moment, I'll finish soon."},
+        {a:"أحسنت", t:"ahsant", e:"Well done!", p:"interj", s:"أحسنت! إجابتك صحيحة.", x:"Well done! Your answer is correct."},
+        {a:"حاول مرة أخرى", t:"hawil marra ukhra", e:"Try again", p:"phrase", s:"حاول مرة أخرى، أنت قريب من الحل.", x:"Try again, you're close to the answer."},
+        {a:"كن حذراً", t:"kun hadhiran", e:"Be careful!", p:"phrase", s:"كن حذراً، الأرض زلقة.", x:"Be careful, the floor is slippery."},
+        {a:"شارك", t:"sharik", e:"Share!", p:"v", s:"شارك ألعابك مع أصدقائك.", x:"Share your toys with your friends."},
+        {a:"اطلب المساعدة", t:"utlub al-musa'ada", e:"Ask for help", p:"phrase", s:"اطلب المساعدة إذا احتجت.", x:"Ask for help if you need it."},
+        {a:"هيا بنا", t:"hayya bina", e:"Let's go!", p:"phrase", s:"هيا بنا، الحافلة تنتظر.", x:"Let's go, the bus is waiting."},
+        {a:"لا تلمس", t:"la talmus", e:"Don't touch!", p:"phrase", s:"لا تلمس الموقد، إنه ساخن.", x:"Don't touch the stove, it's hot."}
+      ]}
+    ]},
+
+    { id:"body-parts-3", en:"Body Parts III & Everyday Phrases", ar:"أجزاء الجسم والعبارات اليومية", icon:"🖐️", diff:"easy",
+      note:"The earlier body vocabulary covered the basics, but left out the fingers by name and the practical phrases you'd actually reach for — \"my head hurts,\" pointing, nodding, shaking hands. Rounding that out here.",
+      subs:[
+      { id:"fingers-face-more", en:"Fingers, Face & More Body Parts", ar:"الأصابع والوجه وأجزاء إضافية", words:[
+        {a:"إبهام", t:"ibham", e:"thumb", p:"n", s:"جرح إبهامه أثناء الطبخ.", x:"He cut his thumb while cooking."},
+        {a:"سبابة", t:"sabbaba", e:"index finger (pointing finger)", p:"n", s:"أشار بإصبعه السبابة نحو الباب.", x:"He pointed with his index finger toward the door."},
+        {a:"وسطى", t:"wusta", e:"middle finger", p:"n", s:"الإصبع الوسطى هي أطول الأصابع.", x:"The middle finger is the longest finger."},
+        {a:"بنصر", t:"binsir", e:"ring finger", p:"n", s:"يضع الخاتم في إصبعه البنصر.", x:"He wears the ring on his ring finger."},
+        {a:"خنصر", t:"khinsir", e:"pinky / little finger", p:"n", s:"الخنصر أصغر أصابع اليد.", x:"The pinky is the smallest finger of the hand."},
+        {a:"أسنان", t:"asnan", e:"teeth", p:"n", s:"يجب أن تنظف أسنانك يومياً.", x:"You should brush your teeth daily."},
+        {a:"سن", t:"sinn", e:"tooth", p:"n", s:"عنده سن مكسورة.", x:"He has a broken tooth."},
+        {a:"حاجب", t:"hajib", e:"eyebrow", p:"n", s:"رفعت حاجبها متفاجئة.", x:"She raised her eyebrow, surprised."},
+        {a:"رمش", t:"rimsh", e:"eyelash", p:"n", s:"سقط رمش في عينها.", x:"An eyelash fell into her eye."},
+        {a:"خد", t:"khadd", e:"cheek", p:"n", s:"قبّلت جدتي خدي.", x:"My grandmother kissed my cheek."},
+        {a:"ذقن", t:"dhaqn", e:"chin", p:"n", s:"له لحية على ذقنه.", x:"He has a beard on his chin."},
+        {a:"جبهة", t:"jabha", e:"forehead", p:"n", s:"لمست جبهته لتتأكد من الحمى.", x:"She touched his forehead to check for fever."},
+        {a:"صدر", t:"sadr", e:"chest", p:"n", s:"شعر بألم في صدره.", x:"He felt pain in his chest."},
+        {a:"ظهر", t:"zahr", e:"back", p:"n", s:"يؤلمني ظهري بعد الجلوس الطويل.", x:"My back hurts after sitting for a long time."},
+        {a:"خصر", t:"khasr", e:"waist", p:"n", s:"ربط الحزام حول خصره.", x:"He tied the belt around his waist."},
+        {a:"حلق", t:"halq", e:"throat", p:"n", s:"حلقي جاف، أحتاج ماء.", x:"My throat is dry, I need water."},
+        {a:"كوع", t:"ku'", e:"elbow", p:"n", s:"استند بكوعه على الطاولة.", x:"He leaned on the table with his elbow."},
+        {a:"كف", t:"kaff", e:"palm (of the hand)", p:"n", s:"وضع القطعة في كف يده.", x:"He put the piece in the palm of his hand."},
+        {a:"إبط", t:"ibt", e:"armpit", p:"n", s:"وضع الترمومتر تحت إبطه.", x:"He put the thermometer under his armpit."},
+        {a:"صدغ", t:"sidgh", e:"temple (side of the head)", p:"n", s:"شعر بنبض في صدغه.", x:"He felt a throbbing in his temple."}
+      ]},
+      { id:"saying-what-hurts", en:"Saying What Hurts", ar:"التعبير عن الألم", words:[
+        {a:"يؤلمني رأسي", t:"yu'limuni ra'si", e:"My head hurts", p:"phrase", s:"يؤلمني رأسي منذ الصباح.", x:"My head has hurt since this morning."},
+        {a:"يؤلمني بطني", t:"yu'limuni batni", e:"My stomach hurts", p:"phrase", s:"يؤلمني بطني بعد الأكل.", x:"My stomach hurts after eating."},
+        {a:"يؤلمني ظهري", t:"yu'limuni zahri", e:"My back hurts", p:"phrase", s:"يؤلمني ظهري من حمل الحقيبة.", x:"My back hurts from carrying the bag."},
+        {a:"تؤلمني أسناني", t:"tu'limuni asnani", e:"My teeth hurt", p:"phrase", s:"تؤلمني أسناني، يجب أن أزور طبيب الأسنان.", x:"My teeth hurt, I should visit the dentist."},
+        {a:"يؤلمني حلقي", t:"yu'limuni halqi", e:"My throat hurts", p:"phrase", s:"يؤلمني حلقي ولا أستطيع الكلام كثيراً.", x:"My throat hurts and I can't talk much."},
+        {a:"عندي حمى", t:"indi humma", e:"I have a fever", p:"phrase", s:"عندي حمى منذ الليلة الماضية.", x:"I've had a fever since last night."},
+        {a:"أشعر بالدوار", t:"ash'uru bid-duwar", e:"I feel dizzy", p:"phrase", s:"أشعر بالدوار عندما أقف بسرعة.", x:"I feel dizzy when I stand up quickly."},
+        {a:"أشعر بالغثيان", t:"ash'uru bil-ghathayan", e:"I feel nauseous", p:"phrase", s:"أشعر بالغثيان في السيارة أحياناً.", x:"I feel nauseous in the car sometimes."},
+        {a:"أحتاج طبيباً", t:"ahtaju tabiban", e:"I need a doctor", p:"phrase", s:"أحتاج طبيباً بشكل عاجل.", x:"I need a doctor urgently."},
+        {a:"أين تؤلمك؟", t:"ayna tu'limuk", e:"Where does it hurt?", p:"phrase", s:"سألني الطبيب: أين تؤلمك؟", x:"The doctor asked me: where does it hurt?"},
+        {a:"هل أنت بخير؟", t:"hal anta bikhayr", e:"Are you okay?", p:"phrase", s:"بدوت متعباً، هل أنت بخير؟", x:"You looked tired, are you okay?"},
+        {a:"لا أشعر أنني بخير", t:"la ash'uru annani bikhayr", e:"I don't feel well", p:"phrase", s:"سأبقى في البيت، لا أشعر أنني بخير.", x:"I'll stay home, I don't feel well."},
+        {a:"أشار بإصبعه", t:"ashara bi-isbi'ihi", e:"He pointed with his finger", p:"phrase", s:"أشار بإصبعه إلى الخريطة.", x:"He pointed with his finger at the map."},
+        {a:"صافحني بيده", t:"safahani biyadihi", e:"He shook my hand", p:"phrase", s:"صافحني بيده وابتسم.", x:"He shook my hand and smiled."},
+        {a:"عض شفته", t:"adda shafatahu", e:"He bit his lip", p:"phrase", s:"عض شفته من التوتر.", x:"He bit his lip from nervousness."},
+        {a:"أغمض عينيه", t:"aghmada aynayhi", e:"He closed his eyes", p:"phrase", s:"أغمض عينيه واستمع للموسيقى.", x:"He closed his eyes and listened to the music."},
+        {a:"فتح فمه", t:"fataha famahu", e:"He opened his mouth", p:"phrase", s:"فتح فمه ليتكلم ثم توقف.", x:"He opened his mouth to speak, then stopped."},
+        {a:"هز رأسه", t:"hazza ra'sahu", e:"He nodded / shook his head", p:"phrase", s:"هز رأسه موافقاً على الفكرة.", x:"He nodded, agreeing with the idea."},
+        {a:"عبس بوجهه", t:"abasa biwajhihi", e:"He frowned", p:"phrase", s:"عبس بوجهه عندما سمع الخبر السيئ.", x:"He frowned when he heard the bad news."},
+        {a:"عطس", t:"atasa", e:"He sneezed", p:"v", s:"عطس ثلاث مرات بسبب الغبار.", x:"He sneezed three times because of the dust."}
+      ]}
+    ]},
+
     { id:"idioms-expressions", en:"Idioms & Expressions", ar:"التعابير الاصطلاحية", icon:"🗨️", diff:"hard",
       note:"Idioms don't translate word-for-word — that's the whole point of them. The literal meaning is given alongside the real meaning for the figurative ones below, so you can see how the image and the actual usage connect.",
       subs:[
@@ -2225,6 +2420,146 @@ function showToast(msg){
   t.classList.add("show");
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(()=>t.classList.remove("show"), 4500);
+}
+
+/* ============================= PRACTICE TIMER ============================= */
+// Lives outside #main so it survives every view change — appended to <body> once at startup.
+let timerState = { duration:900, remaining:900, running:false, intervalId:null, panelOpen:false };
+
+function initTimerWidget(){
+  const widget = document.createElement("div");
+  widget.id = "timerWidget";
+  widget.className = "timer-widget";
+  widget.innerHTML = `
+    <div class="timer-panel" id="timerPanel" style="display:none;">
+      <div class="timer-panel-title">
+        <span>⏱️ Practice Timer</span>
+        <button class="timer-panel-close" id="timerPanelClose">✕</button>
+      </div>
+      <div class="timer-display" id="timerDisplay">15:00</div>
+      <div class="timer-presets" id="timerPresets">
+        <button class="timer-preset" data-min="5">5m</button>
+        <button class="timer-preset" data-min="10">10m</button>
+        <button class="timer-preset active" data-min="15">15m</button>
+        <button class="timer-preset" data-min="20">20m</button>
+        <button class="timer-preset" data-min="30">30m</button>
+      </div>
+      <div class="timer-custom">
+        <input type="number" id="timerCustomInput" min="1" max="240" placeholder="Custom min">
+        <button class="btn" id="timerCustomSet">Set</button>
+      </div>
+      <div class="timer-controls">
+        <button class="btn primary" id="timerStartPause">Start</button>
+        <button class="btn" id="timerReset">Reset</button>
+      </div>
+    </div>
+    <button class="timer-fab" id="timerFab" title="Practice timer">⏱️</button>
+  `;
+  document.body.appendChild(widget);
+
+  document.getElementById("timerFab").addEventListener("click", ()=>{
+    timerState.panelOpen = !timerState.panelOpen;
+    document.getElementById("timerPanel").style.display = timerState.panelOpen ? "block" : "none";
+  });
+  document.getElementById("timerPanelClose").addEventListener("click", ()=>{
+    timerState.panelOpen = false;
+    document.getElementById("timerPanel").style.display = "none";
+  });
+  document.querySelectorAll(".timer-preset").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      setTimerDuration(parseInt(btn.dataset.min)*60);
+      document.querySelectorAll(".timer-preset").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+  document.getElementById("timerCustomSet").addEventListener("click", ()=>{
+    const input = document.getElementById("timerCustomInput");
+    const min = parseInt(input.value);
+    if(min > 0 && min <= 240){
+      setTimerDuration(min*60);
+      document.querySelectorAll(".timer-preset").forEach(b=>b.classList.remove("active"));
+    }
+  });
+  document.getElementById("timerStartPause").addEventListener("click", toggleTimer);
+  document.getElementById("timerReset").addEventListener("click", resetTimer);
+  updateTimerDisplay();
+}
+
+function setTimerDuration(seconds){
+  pauseTimer();
+  timerState.duration = seconds;
+  timerState.remaining = seconds;
+  updateTimerDisplay();
+}
+function toggleTimer(){ timerState.running ? pauseTimer() : startTimer(); }
+function startTimer(){
+  if(timerState.remaining <= 0) timerState.remaining = timerState.duration;
+  timerState.running = true;
+  const btn = document.getElementById("timerStartPause");
+  if(btn) btn.textContent = "Pause";
+  const fab = document.getElementById("timerFab");
+  if(fab) fab.classList.add("running");
+  clearInterval(timerState.intervalId);
+  timerState.intervalId = setInterval(()=>{
+    timerState.remaining--;
+    updateTimerDisplay();
+    if(timerState.remaining <= 0){
+      timerRingAlert();
+      pauseTimer();
+    }
+  }, 1000);
+}
+function pauseTimer(){
+  timerState.running = false;
+  clearInterval(timerState.intervalId);
+  const btn = document.getElementById("timerStartPause");
+  if(btn) btn.textContent = "Start";
+  const fab = document.getElementById("timerFab");
+  if(fab) fab.classList.remove("running");
+}
+function resetTimer(){
+  pauseTimer();
+  timerState.remaining = timerState.duration;
+  updateTimerDisplay();
+}
+function updateTimerDisplay(){
+  const m = Math.floor(timerState.remaining/60);
+  const s = timerState.remaining%60;
+  const text = m+":"+String(s).padStart(2,"0");
+  const display = document.getElementById("timerDisplay");
+  if(display) display.textContent = text;
+  const fab = document.getElementById("timerFab");
+  if(fab) fab.textContent = (timerState.running || timerState.remaining !== timerState.duration) ? text : "⏱️";
+}
+function timerRingAlert(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const playBeep = (delay)=>{
+      setTimeout(()=>{
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime+0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.35);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      }, delay);
+    };
+    playBeep(0); playBeep(450); playBeep(900);
+  }catch(e){ /* audio not available */ }
+  if(navigator.vibrate) navigator.vibrate([200,100,200,100,200]);
+  const mins = Math.round(timerState.duration/60);
+  showToast(`⏰ Time's up! You practiced for ${mins} minute${mins===1?"":"s"}.`);
+  const fab = document.getElementById("timerFab");
+  if(fab){
+    fab.classList.add("ringing");
+    setTimeout(()=>fab.classList.remove("ringing"), 4000);
+  }
+  timerState.panelOpen = true;
+  const panel = document.getElementById("timerPanel");
+  if(panel) panel.style.display = "block";
 }
 
 function timeAgo(ts){
@@ -2890,7 +3225,10 @@ function renderFlashcard(){
     <div class="crumbs">${crumbHtml(fcState, " — Flashcards")}</div>
     <div class="fc-wrap">
       <div class="fc-progress"><div class="fc-progress-bar" style="width:${pct}%"></div></div>
-      <div class="fc-meta">Card ${fcState.i+1} of ${fcState.deck.length}</div>
+      <div class="practice-top-row">
+        <div class="fc-meta">Card ${fcState.i+1} of ${fcState.deck.length}</div>
+        <button class="exit-btn" id="fcExitBtn" title="Exit to subcategories">✕ Exit</button>
+      </div>
       ${w.isPopQuiz ? '<div class="popquiz-badge">🔔 Pop quiz — you marked this mastered before</div>' : ""}
       <div class="card" id="fcCard">
         <div class="card-inner">
@@ -2916,6 +3254,10 @@ function renderFlashcard(){
     </div>
   `;
   bindCrumbs();
+  document.getElementById("fcExitBtn").addEventListener("click", ()=>{
+    if(fcState.cat) renderCategory(fcState.cat.id);
+    else setView("home");
+  });
   const cardEl = document.getElementById("fcCard");
   cardEl.addEventListener("click", ()=>cardEl.classList.toggle("flipped"));
   document.getElementById("fcSpeakBtn").addEventListener("click", (e)=>{ e.stopPropagation(); speak(w.tk || w.a); });
@@ -2956,11 +3298,11 @@ let qzState = {};
 function startQuiz(catId, subId){
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
-  qzState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, score:0, answered:false };
+  qzState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, score:0, answered:false, history:[] };
   renderQuiz();
 }
 function startQuizSession(words, label){
-  qzState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, score:0, answered:false };
+  qzState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, score:0, answered:false, history:[] };
   renderQuiz();
 }
 
@@ -2975,6 +3317,26 @@ function buildOptionsReverse(correctWord, pool){
   return shuffle([displayWord(correctWord), ...distractors]);
 }
 
+function pushQzHistory(w){
+  qzState.history.push({
+    index: qzState.i,
+    wordId: w.id,
+    progressBefore: PROGRESS[w.id] ? JSON.parse(JSON.stringify(PROGRESS[w.id])) : null,
+    scoreBefore: qzState.score
+  });
+}
+function undoLastQzAnswer(){
+  const entry = qzState.history.pop();
+  if(!entry) return false;
+  qzState.i = entry.index;
+  qzState.score = entry.scoreBefore;
+  qzState.answered = false;
+  if(entry.progressBefore === null) delete PROGRESS[entry.wordId];
+  else PROGRESS[entry.wordId] = entry.progressBefore;
+  saveProgress();
+  return true;
+}
+
 function renderQuiz(){
   if(qzState.i >= qzState.deck.length){
     main.innerHTML = `
@@ -2983,6 +3345,7 @@ function renderQuiz(){
         <div style="font-size:44px;">🏁</div>
         <div class="big">Score: ${qzState.score} / ${qzState.deck.length}</div>
         <div class="fc-controls" style="margin-top:20px;">
+          ${qzState.history.length>0 ? '<button class="btn back-btn" id="qzBackOne">← Back to last question</button>' : ""}
           <button class="btn primary" id="qzAgain">Try again</button>
           <button class="btn teal" id="qzFlash">Review with flashcards</button>
           <button class="btn" id="qzBack">${qzState.cat ? "Back to subcategories" : "Back to categories"}</button>
@@ -2990,6 +3353,8 @@ function renderQuiz(){
       </div>
     `;
     bindCrumbs();
+    const backOne = document.getElementById("qzBackOne");
+    if(backOne) backOne.addEventListener("click", ()=>{ undoLastQzAnswer(); renderQuiz(); });
     document.getElementById("qzAgain").addEventListener("click", ()=>{
       if(qzState.cat) startQuiz(qzState.cat.id, qzState.sub.id);
       else startQuizSession(qzState.sourceWords, qzState.label);
@@ -3021,7 +3386,13 @@ function renderQuiz(){
   main.innerHTML = `
     <div class="crumbs">${crumbHtml(qzState, " — Quiz")}</div>
     <div class="quiz-wrap">
-      <div class="quiz-score">Question ${qzState.i+1} of ${qzState.deck.length} · Score ${qzState.score}</div>
+      <div class="quiz-top-row">
+        <div class="quiz-score">Question ${qzState.i+1} of ${qzState.deck.length} · Score ${qzState.score}</div>
+        <div class="quiz-top-actions">
+          ${qzState.history.length>0 ? '<button class="btn back-btn quiz-back-btn" id="qzBackBtn">← Back</button>' : ""}
+          <button class="exit-btn" id="qzExitBtn" title="Exit to subcategories">✕ Exit</button>
+        </div>
+      </div>
       ${w.isPopQuiz ? '<div class="popquiz-badge">🔔 Pop quiz — you marked this mastered before</div>' : ""}
       ${promptHtml}
       <div class="quiz-options" id="quizOptions"></div>
@@ -3029,6 +3400,12 @@ function renderQuiz(){
     </div>
   `;
   bindCrumbs();
+  const qzBackBtn = document.getElementById("qzBackBtn");
+  if(qzBackBtn) qzBackBtn.addEventListener("click", ()=>{ if(undoLastQzAnswer()) renderQuiz(); });
+  document.getElementById("qzExitBtn").addEventListener("click", ()=>{
+    if(qzState.cat) renderCategory(qzState.cat.id);
+    else setView("home");
+  });
   const speakBtn = document.getElementById("quizSpeakBtn");
   if(speakBtn) speakBtn.addEventListener("click", (e)=>{ e.stopPropagation(); speak(w.tk || w.a); });
   const optWrap = document.getElementById("quizOptions");
@@ -3039,6 +3416,7 @@ function renderQuiz(){
     btn.addEventListener("click", ()=>{
       if(qzState.answered) return;
       qzState.answered = true;
+      pushQzHistory(w);
       const correct = optText === correctText;
       if(correct) qzState.score++;
       const {demoted} = markResult(w, correct);
@@ -3284,11 +3662,12 @@ function shuffleTokensNontrivial(tokens){
 }
 function startBuilder(){
   const pool = getBuilderPool();
-  builderState = { pool, idx: Math.floor(Math.random()*pool.length) };
+  builderState = { pool, idx: Math.floor(Math.random()*pool.length), history:[] };
   loadBuilderSentence();
 }
 function loadBuilderSentence(){
   const w = builderState.pool[builderState.idx];
+  builderState.snapshotBefore = PROGRESS[w.id] ? JSON.parse(JSON.stringify(PROGRESS[w.id])) : null;
   const tokens = tokenize(w.s);
   builderState.tokens = tokens;
   builderState.bank = shuffleTokensNontrivial(tokens);
@@ -3298,10 +3677,21 @@ function loadBuilderSentence(){
   renderBuilder();
 }
 function nextBuilderSentence(){
+  builderState.history.push({ idx: builderState.idx, wordId: builderState.currentWord.id, progressBefore: builderState.snapshotBefore });
   let newIdx;
   do{ newIdx = Math.floor(Math.random()*builderState.pool.length); } while(newIdx===builderState.idx && builderState.pool.length>1);
   builderState.idx = newIdx;
   loadBuilderSentence();
+}
+function undoLastBuilderSentence(){
+  const entry = builderState.history.pop();
+  if(!entry) return false;
+  builderState.idx = entry.idx;
+  if(entry.progressBefore === null) delete PROGRESS[entry.wordId];
+  else PROGRESS[entry.wordId] = entry.progressBefore;
+  saveProgress();
+  loadBuilderSentence();
+  return true;
 }
 function renderBuilder(){
   const w = builderState.currentWord;
@@ -3317,6 +3707,7 @@ function renderBuilder(){
     <div class="builder-answer" id="builderAnswer"></div>
     <div class="builder-bank" id="builderBank"></div>
     <div class="builder-controls">
+      ${builderState.history.length>0 ? '<button class="btn back-btn" id="builderBackBtn">← Previous sentence</button>' : ""}
       <button class="btn" id="builderShuffle">🔀 Shuffle bank</button>
       <button class="btn teal" id="builderHint">💡 Hint</button>
       <button class="btn primary" id="builderCheck">✓ Check</button>
@@ -3326,6 +3717,8 @@ function renderBuilder(){
   `;
   drawBuilderAnswer();
   drawBuilderBank();
+  const backBtn = document.getElementById("builderBackBtn");
+  if(backBtn) backBtn.addEventListener("click", undoLastBuilderSentence);
   document.getElementById("builderShuffle").addEventListener("click", ()=>{ builderState.bank = shuffle(builderState.bank); drawBuilderBank(); });
   document.getElementById("builderCheck").addEventListener("click", checkBuilder);
   document.getElementById("builderHint").addEventListener("click", showBuilderHint);
@@ -3457,6 +3850,7 @@ function render(){
   await loadProgress();
   await loadStreak();
   render();
+  initTimerWidget();
   // Service worker: only registers over HTTPS/localhost (browsers block it on file:// pages).
   // This is what makes offline use + "Install app" work once this is hosted somewhere.
   if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){

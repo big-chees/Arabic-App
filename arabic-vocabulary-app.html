@@ -62,6 +62,7 @@
     gap:20px;
     flex-wrap:wrap;
     border-bottom:1px solid var(--border);
+    position:relative;
   }
   .brand{display:flex; align-items:baseline; gap:12px; cursor:pointer; flex-shrink:0;}
   .brand-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:30px; color:var(--gold); font-weight:700;}
@@ -110,6 +111,27 @@
   .tashkeel-toggle.on{background:var(--teal); border-color:var(--teal); color:var(--ink); font-weight:600;}
   .tk-sample{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:16px;}
 
+  .voice-toggle{
+    background:transparent; border:1px solid var(--border); color:var(--text-muted);
+    padding:9px 16px; border-radius:999px; font-size:12.5px; cursor:pointer; font-family:'Inter',sans-serif;
+    display:inline-flex; align-items:center; gap:6px; transition:all .15s ease;
+  }
+  .voice-toggle:hover{border-color:var(--gold); color:var(--text);}
+  .voice-wrap{position:relative; flex-shrink:0;}
+  .voice-panel{
+    position:absolute; top:100%; right:0; margin-top:8px; background:var(--panel-2); border:1px solid var(--gold); border-radius:10px;
+    padding:14px; width:280px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:150; max-height:340px; overflow-y:auto;
+  }
+  .voice-option{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px; border-radius:6px;
+    cursor:pointer; font-size:12.5px; transition:background .15s ease;
+  }
+  .voice-option:hover{background:rgba(201,162,75,0.12);}
+  .voice-option.selected{background:rgba(47,166,160,0.15); color:var(--teal-soft); font-weight:600;}
+  .voice-option-test{background:none; border:1px solid var(--border); color:var(--text-muted); border-radius:5px; padding:3px 8px; font-size:11px; cursor:pointer; flex-shrink:0;}
+  .voice-option-test:hover{border-color:var(--gold); color:var(--text);}
+  .voice-panel-note{font-size:11px; color:var(--text-muted); margin-bottom:10px; line-height:1.5;}
+
   main{padding:34px 6vw 80px; max-width:1180px; margin:0 auto;}
 
   /* ---------- hero ---------- */
@@ -141,12 +163,13 @@
   .root-letters{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:28px; color:var(--gold-soft); direction:rtl; letter-spacing:4px;}
   .root-meaning{font-size:12.5px; color:var(--teal-soft); margin:4px 0 14px; font-style:italic;}
   .root-word-row{
-    display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
     padding:9px 0; border-bottom:1px dashed var(--border);
   }
   .root-word-row:last-child{border-bottom:none;}
   .root-word-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:19px; direction:rtl; color:var(--text);}
-  .root-word-meta{font-size:11.5px; color:var(--text-muted); text-align:right; flex-shrink:0;}
+  .root-word-meta{font-size:11.5px; color:var(--text-muted); text-align:right; flex:1;}
+  .root-speak-btn{width:28px; height:28px; font-size:11px; flex-shrink:0;}
   .stat{text-align:center;}
   .stat-num{font-family:'Fraunces',serif; font-size:26px; color:var(--teal-soft); font-weight:600;}
   .stat-label{font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em;}
@@ -335,7 +358,28 @@
     background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
     padding:18px 20px; margin-bottom:12px;
   }
-  .sentence-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:22px; direction:rtl; text-align:right; line-height:1.9;}
+  .sentence-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:22px; direction:rtl; text-align:right; line-height:1.9; display:flex; align-items:center; gap:12px; justify-content:flex-end;}
+  .sentence-speak-btn{flex-shrink:0; width:32px; height:32px; font-size:13px;}
+  .sentence-ar-centered{justify-content:center; flex-direction:row-reverse;}
+
+  .sent-hub-actions{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:36px;}
+  .sent-hub-btn{
+    flex:1; min-width:260px; display:flex; align-items:center; gap:16px; text-align:left;
+    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px;
+    cursor:pointer; transition:all .18s ease;
+  }
+  .sent-hub-btn.primary:hover{border-color:var(--gold); background:rgba(201,162,75,0.08);}
+  .sent-hub-btn.teal:hover{border-color:var(--teal); background:rgba(47,166,160,0.08);}
+  .sent-hub-icon{font-size:30px; flex-shrink:0;}
+  .sent-hub-title{display:block; font-family:'Fraunces',serif; font-size:16px; font-weight:600; color:var(--text);}
+  .sent-hub-sub{display:block; font-size:12px; color:var(--text-muted); margin-top:3px;}
+
+  .sent-mode-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+
+  .sentence-practice-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:36px 28px; max-width:640px; margin:0 auto; text-align:center;
+  }
   .sentence-toggle{
     margin-top:10px; font-size:12px; color:var(--teal-soft); cursor:pointer; letter-spacing:0.04em;
     display:inline-block; border-bottom:1px dotted var(--teal-soft);
@@ -403,6 +447,12 @@
     font-family:'Noto Naskh Arabic','Amiri',serif; direction:rtl; font-size:16px; color:var(--teal-soft);
     display:inline; margin-top:4px;
   }
+  .example-chip{
+    background:rgba(47,166,160,0.1); border:1px solid var(--border); color:var(--teal-soft);
+    font-family:'Noto Naskh Arabic','Amiri',serif; font-size:14px; padding:3px 9px; border-radius:999px;
+    cursor:pointer; margin:2px; transition:all .15s ease; direction:rtl;
+  }
+  .example-chip:hover{background:var(--teal); color:var(--ink); border-color:var(--teal);}
   .grammar-why{font-size:13.5px; color:var(--text); line-height:1.7; margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);}
 
   .person-cell{display:flex; flex-direction:column; gap:4px;}
@@ -663,6 +713,12 @@
   <button class="tashkeel-toggle" id="tashkeelToggle" title="Show vowel marks (tashkeel) on words where available">
     <span class="tk-sample">اَبَتَ</span> Tashkeel: <span id="tkState">Off</span>
   </button>
+  <div class="voice-wrap">
+    <button class="voice-toggle" id="voiceToggle" title="Choose which voice reads Arabic aloud">
+      🔊 Voice: <span id="voiceLabel">Default</span>
+    </button>
+    <div class="voice-panel" id="voicePanel" style="display:none;"></div>
+  </div>
 </header>
 
 <main id="main"></main>
@@ -2105,95 +2161,138 @@ function personLabel(p){ return `${p.label} (${p.en})`; }
 const CONJUGATIONS = [
   { verb:"كتب", t:"kataba", e:"to write", root:"ك - ت - ب", type:"regular", badge:"Regular (sound) verb", note:"This is the model verb — every regular Form I verb follows this exact suffix and prefix pattern.",
     past:[["كَتَبَ","kataba"],["كَتَبَتْ","katabat"],["كَتَبْتَ","katabta"],["كَتَبْتِ","katabti"],["كَتَبْتُ","katabtu"],["كَتَبوا","katabu"],["كَتَبْنَ","katabna"],["كَتَبْتُم","katabtum"],["كَتَبْتُنَّ","katabtunna"],["كَتَبْنا","katabnaa"]],
-    present:[["يَكْتُبُ","yaktubu"],["تَكْتُبُ","taktubu"],["تَكْتُبُ","taktubu"],["تَكْتُبينَ","taktubina"],["أَكْتُبُ","aktubu"],["يَكْتُبونَ","yaktubuna"],["يَكْتُبْنَ","yaktubna"],["تَكْتُبونَ","taktubuna"],["تَكْتُبْنَ","taktubna"],["نَكْتُبُ","naktubu"]]
+    present:[["يَكْتُبُ","yaktubu"],["تَكْتُبُ","taktubu"],["تَكْتُبُ","taktubu"],["تَكْتُبينَ","taktubina"],["أَكْتُبُ","aktubu"],["يَكْتُبونَ","yaktubuna"],["يَكْتُبْنَ","yaktubna"],["تَكْتُبونَ","taktubuna"],["تَكْتُبْنَ","taktubna"],["نَكْتُبُ","naktubu"]],
+    command:[["اُكْتُبْ","uktub"],["اُكْتُبِي","uktubi"],["اُكْتُبوا","uktubu"],["اُكْتُبْنَ","uktubna"]]
   },
   { verb:"فهم", t:"fahima", e:"to understand", root:"ف - ه - م", type:"regular", badge:"Regular (sound) verb", note:"Same suffixes and prefixes as كتب above — only the vowel pattern in the middle changes (i–a instead of a–u).",
     past:[["فَهِمَ","fahima"],["فَهِمَتْ","fahimat"],["فَهِمْتَ","fahimta"],["فَهِمْتِ","fahimti"],["فَهِمْتُ","fahimtu"],["فَهِموا","fahimu"],["فَهِمْنَ","fahimna"],["فَهِمْتُم","fahimtum"],["فَهِمْتُنَّ","fahimtunna"],["فَهِمْنا","fahimnaa"]],
-    present:[["يَفْهَمُ","yafhamu"],["تَفْهَمُ","tafhamu"],["تَفْهَمُ","tafhamu"],["تَفْهَمينَ","tafhamina"],["أَفْهَمُ","afhamu"],["يَفْهَمونَ","yafhamuna"],["يَفْهَمْنَ","yafhamna"],["تَفْهَمونَ","tafhamuna"],["تَفْهَمْنَ","tafhamna"],["نَفْهَمُ","nafhamu"]]
+    present:[["يَفْهَمُ","yafhamu"],["تَفْهَمُ","tafhamu"],["تَفْهَمُ","tafhamu"],["تَفْهَمينَ","tafhamina"],["أَفْهَمُ","afhamu"],["يَفْهَمونَ","yafhamuna"],["يَفْهَمْنَ","yafhamna"],["تَفْهَمونَ","tafhamuna"],["تَفْهَمْنَ","tafhamna"],["نَفْهَمُ","nafhamu"]],
+    command:[["اِفْهَمْ","ifham"],["اِفْهَمِي","ifhami"],["اِفْهَموا","ifhamu"],["اِفْهَمْنَ","ifhamna"]]
   },
   { verb:"لعب", t:"la'iba", e:"to play", root:"ل - ع - ب", type:"regular", badge:"Regular (sound) verb", note:"Another perfectly regular verb — great one to practice the pattern with.",
     past:[["لَعِبَ","la'iba"],["لَعِبَتْ","la'ibat"],["لَعِبْتَ","la'ibta"],["لَعِبْتِ","la'ibti"],["لَعِبْتُ","la'ibtu"],["لَعِبوا","la'ibu"],["لَعِبْنَ","la'ibna"],["لَعِبْتُم","la'ibtum"],["لَعِبْتُنَّ","la'ibtunna"],["لَعِبْنا","la'ibnaa"]],
-    present:[["يَلْعَبُ","yal'abu"],["تَلْعَبُ","tal'abu"],["تَلْعَبُ","tal'abu"],["تَلْعَبينَ","tal'abina"],["أَلْعَبُ","al'abu"],["يَلْعَبونَ","yal'abuna"],["يَلْعَبْنَ","yal'abna"],["تَلْعَبونَ","tal'abuna"],["تَلْعَبْنَ","tal'abna"],["نَلْعَبُ","nal'abu"]]
+    present:[["يَلْعَبُ","yal'abu"],["تَلْعَبُ","tal'abu"],["تَلْعَبُ","tal'abu"],["تَلْعَبينَ","tal'abina"],["أَلْعَبُ","al'abu"],["يَلْعَبونَ","yal'abuna"],["يَلْعَبْنَ","yal'abna"],["تَلْعَبونَ","tal'abuna"],["تَلْعَبْنَ","tal'abna"],["نَلْعَبُ","nal'abu"]],
+    command:[["اِلْعَبْ","il'ab"],["اِلْعَبِي","il'abi"],["اِلْعَبوا","il'abu"],["اِلْعَبْنَ","il'abna"]]
   },
   { verb:"ذهب", t:"dhahaba", e:"to go", root:"ذ - ه - ب", type:"regular", badge:"Regular (sound) verb", note:"A high-frequency regular verb — the a–a vowel pattern (dhahaba / yadhhabu).",
     past:[["ذَهَبَ","dhahaba"],["ذَهَبَتْ","dhahabat"],["ذَهَبْتَ","dhahabta"],["ذَهَبْتِ","dhahabti"],["ذَهَبْتُ","dhahabtu"],["ذَهَبوا","dhahabu"],["ذَهَبْنَ","dhahabna"],["ذَهَبْتُم","dhahabtum"],["ذَهَبْتُنَّ","dhahabtunna"],["ذَهَبْنا","dhahabnaa"]],
-    present:[["يَذْهَبُ","yadhhabu"],["تَذْهَبُ","tadhhabu"],["تَذْهَبُ","tadhhabu"],["تَذْهَبينَ","tadhhabina"],["أَذْهَبُ","adhhabu"],["يَذْهَبونَ","yadhhabuna"],["يَذْهَبْنَ","yadhhabna"],["تَذْهَبونَ","tadhhabuna"],["تَذْهَبْنَ","tadhhabna"],["نَذْهَبُ","nadhhabu"]]
+    present:[["يَذْهَبُ","yadhhabu"],["تَذْهَبُ","tadhhabu"],["تَذْهَبُ","tadhhabu"],["تَذْهَبينَ","tadhhabina"],["أَذْهَبُ","adhhabu"],["يَذْهَبونَ","yadhhabuna"],["يَذْهَبْنَ","yadhhabna"],["تَذْهَبونَ","tadhhabuna"],["تَذْهَبْنَ","tadhhabna"],["نَذْهَبُ","nadhhabu"]],
+    command:[["اِذْهَبْ","idhhab"],["اِذْهَبِي","idhhabi"],["اِذْهَبوا","idhhabu"],["اِذْهَبْنَ","idhhabna"]]
   },
   { verb:"عمل", t:"amila", e:"to work / to do", root:"ع - م - ل", type:"regular", badge:"Regular (sound) verb", note:"Same i–a pattern as فهم above.",
     past:[["عَمِلَ","amila"],["عَمِلَتْ","amilat"],["عَمِلْتَ","amilta"],["عَمِلْتِ","amilti"],["عَمِلْتُ","amiltu"],["عَمِلوا","amilu"],["عَمِلْنَ","amilna"],["عَمِلْتُم","amiltum"],["عَمِلْتُنَّ","amiltunna"],["عَمِلْنا","amilnaa"]],
-    present:[["يَعْمَلُ","ya'malu"],["تَعْمَلُ","ta'malu"],["تَعْمَلُ","ta'malu"],["تَعْمَلينَ","ta'malina"],["أَعْمَلُ","a'malu"],["يَعْمَلونَ","ya'maluna"],["يَعْمَلْنَ","ya'malna"],["تَعْمَلونَ","ta'maluna"],["تَعْمَلْنَ","ta'malna"],["نَعْمَلُ","na'malu"]]
+    present:[["يَعْمَلُ","ya'malu"],["تَعْمَلُ","ta'malu"],["تَعْمَلُ","ta'malu"],["تَعْمَلينَ","ta'malina"],["أَعْمَلُ","a'malu"],["يَعْمَلونَ","ya'maluna"],["يَعْمَلْنَ","ya'malna"],["تَعْمَلونَ","ta'maluna"],["تَعْمَلْنَ","ta'malna"],["نَعْمَلُ","na'malu"]],
+    command:[["اِعْمَلْ","i'mal"],["اِعْمَلِي","i'mali"],["اِعْمَلوا","i'malu"],["اِعْمَلْنَ","i'malna"]]
   },
   { verb:"سأل", t:"sa'ala", e:"to ask", root:"س - أ - ل", type:"regular", badge:"Hamzated (mostly regular)", note:"A hamza sits in the middle of the root, but the suffix/prefix pattern is unaffected — spelling just needs care.",
     past:[["سَأَلَ","sa'ala"],["سَأَلَتْ","sa'alat"],["سَأَلْتَ","sa'alta"],["سَأَلْتِ","sa'alti"],["سَأَلْتُ","sa'altu"],["سَأَلوا","sa'alu"],["سَأَلْنَ","sa'alna"],["سَأَلْتُم","sa'altum"],["سَأَلْتُنَّ","sa'altunna"],["سَأَلْنا","sa'alnaa"]],
-    present:[["يَسْأَلُ","yas'alu"],["تَسْأَلُ","tas'alu"],["تَسْأَلُ","tas'alu"],["تَسْأَلينَ","tas'alina"],["أَسْأَلُ","as'alu"],["يَسْأَلونَ","yas'aluna"],["يَسْأَلْنَ","yas'alna"],["تَسْأَلونَ","tas'aluna"],["تَسْأَلْنَ","tas'alna"],["نَسْأَلُ","nas'alu"]]
+    present:[["يَسْأَلُ","yas'alu"],["تَسْأَلُ","tas'alu"],["تَسْأَلُ","tas'alu"],["تَسْأَلينَ","tas'alina"],["أَسْأَلُ","as'alu"],["يَسْأَلونَ","yas'aluna"],["يَسْأَلْنَ","yas'alna"],["تَسْأَلونَ","tas'aluna"],["تَسْأَلْنَ","tas'alna"],["نَسْأَلُ","nas'alu"]],
+    command:[["اِسْأَلْ","is'al"],["اِسْأَلِي","is'ali"],["اِسْأَلوا","is'alu"],["اِسْأَلْنَ","is'alna"]]
   },
   { verb:"كان", t:"kana", e:"to be", root:"ك - و - ن", type:"irregular", badge:"Hollow verb", note:"The middle root letter (و) disappears whenever a suffix starting with a consonant is added — كان becomes كُنْـ. Notice the person suffixes themselves never change.",
     past:[["كانَ","kana"],["كانَتْ","kanat"],["كُنْتَ","kunta"],["كُنْتِ","kunti"],["كُنْتُ","kuntu"],["كانوا","kanu"],["كُنَّ","kunna"],["كُنْتُم","kuntum"],["كُنْتُنَّ","kuntunna"],["كُنّا","kunnaa"]],
-    present:[["يَكونُ","yakunu"],["تَكونُ","takunu"],["تَكونُ","takunu"],["تَكونينَ","takunina"],["أَكونُ","akunu"],["يَكونونَ","yakununa"],["يَكُنَّ","yakunna"],["تَكونونَ","takununa"],["تَكُنَّ","takunna"],["نَكونُ","nakunu"]]
+    present:[["يَكونُ","yakunu"],["تَكونُ","takunu"],["تَكونُ","takunu"],["تَكونينَ","takunina"],["أَكونُ","akunu"],["يَكونونَ","yakununa"],["يَكُنَّ","yakunna"],["تَكونونَ","takununa"],["تَكُنَّ","takunna"],["نَكونُ","nakunu"]],
+    command:[["كُنْ","kun"],["كُونِي","kuni"],["كونوا","kunu"],["كُنَّ","kunna"]]
   },
   { verb:"قال", t:"qala", e:"to say", root:"ق - و - ل", type:"irregular", badge:"Hollow verb", note:"Same hollow-verb pattern as كان — the long اـ shortens to a short ـُـ before consonant-starting suffixes: قال → قُلْتَ.",
     past:[["قالَ","qala"],["قالَتْ","qalat"],["قُلْتَ","qulta"],["قُلْتِ","qulti"],["قُلْتُ","qultu"],["قالوا","qalu"],["قُلْنَ","qulna"],["قُلْتُم","qultum"],["قُلْتُنَّ","qultunna"],["قُلْنا","qulnaa"]],
-    present:[["يَقولُ","yaqulu"],["تَقولُ","taqulu"],["تَقولُ","taqulu"],["تَقولينَ","taqulina"],["أَقولُ","aqulu"],["يَقولونَ","yaquluna"],["يَقُلْنَ","yaqulna"],["تَقولونَ","taquluna"],["تَقُلْنَ","taqulna"],["نَقولُ","naqulu"]]
+    present:[["يَقولُ","yaqulu"],["تَقولُ","taqulu"],["تَقولُ","taqulu"],["تَقولينَ","taqulina"],["أَقولُ","aqulu"],["يَقولونَ","yaquluna"],["يَقُلْنَ","yaqulna"],["تَقولونَ","taquluna"],["تَقُلْنَ","taqulna"],["نَقولُ","naqulu"]],
+    command:[["قُلْ","qul"],["قولي","quli"],["قولوا","qulu"],["قُلْنَ","qulna"]]
   },
   { verb:"رأى", t:"ra'a", e:"to see", root:"ر - أ - ي", type:"irregular", badge:"Defective verb", note:"The weak final root letter (ي) shifts or drops depending on the ending. Still — every person suffix matches the same family you already know.",
     past:[["رَأى","ra'a"],["رَأَتْ","ra'at"],["رَأَيْتَ","ra'ayta"],["رَأَيْتِ","ra'ayti"],["رَأَيْتُ","ra'aytu"],["رَأَوْا","ra'aw"],["رَأَيْنَ","ra'ayna"],["رَأَيْتُم","ra'aytum"],["رَأَيْتُنَّ","ra'aytunna"],["رَأَيْنا","ra'aynaa"]],
-    present:[["يَرى","yara"],["تَرى","tara"],["تَرى","tara"],["تَرَيْنَ","tarayna"],["أَرى","ara"],["يَرَوْنَ","yarawna"],["يَرَيْنَ","yarayna"],["تَرَوْنَ","tarawna"],["تَرَيْنَ","tarayna"],["نَرى","nara"]]
+    present:[["يَرى","yara"],["تَرى","tara"],["تَرى","tara"],["تَرَيْنَ","tarayna"],["أَرى","ara"],["يَرَوْنَ","yarawna"],["يَرَيْنَ","yarayna"],["تَرَوْنَ","tarawna"],["تَرَيْنَ","tarayna"],["نَرى","nara"]],
+    command:[["رَ","ra"],["رَيْ","ray"],["رَوْا","raw"],["رَيْنَ","rayna"]]
   },
   { verb:"أكل", t:"akala", e:"to eat", root:"أ - ك - ل", type:"irregular", badge:"Hamzated (initial)", note:"Fun fact: the \"I\" form fuses two hamzas into one long آ — آكُلُ (aakulu), not أَأْكُلُ. The imperative is also irregular: كُلْ! (\"Eat!\") drops the hamza entirely.",
     past:[["أَكَلَ","akala"],["أَكَلَتْ","akalat"],["أَكَلْتَ","akalta"],["أَكَلْتِ","akalti"],["أَكَلْتُ","akaltu"],["أَكَلوا","akalu"],["أَكَلْنَ","akalna"],["أَكَلْتُم","akaltum"],["أَكَلْتُنَّ","akaltunna"],["أَكَلْنا","akalnaa"]],
-    present:[["يَأْكُلُ","ya'kulu"],["تَأْكُلُ","ta'kulu"],["تَأْكُلُ","ta'kulu"],["تَأْكُلينَ","ta'kulina"],["آكُلُ","aakulu"],["يَأْكُلونَ","ya'kuluna"],["يَأْكُلْنَ","ya'kulna"],["تَأْكُلونَ","ta'kuluna"],["تَأْكُلْنَ","ta'kulna"],["نَأْكُلُ","na'kulu"]]
+    present:[["يَأْكُلُ","ya'kulu"],["تَأْكُلُ","ta'kulu"],["تَأْكُلُ","ta'kulu"],["تَأْكُلينَ","ta'kulina"],["آكُلُ","aakulu"],["يَأْكُلونَ","ya'kuluna"],["يَأْكُلْنَ","ya'kulna"],["تَأْكُلونَ","ta'kuluna"],["تَأْكُلْنَ","ta'kulna"],["نَأْكُلُ","na'kulu"]],
+    command:[["كُلْ","kul"],["كُلِي","kuli"],["كُلوا","kulu"],["كُلْنَ","kulna"]]
   },
   { verb:"شرب", t:"shariba", e:"to drink", root:"ش - ر - ب", type:"regular", badge:"Regular (sound) verb", note:"Another fully regular verb — same i–a vowel pattern as فهم.",
     past:[["شَرِبَ","shariba"],["شَرِبَتْ","sharibat"],["شَرِبْتَ","sharibta"],["شَرِبْتِ","sharibti"],["شَرِبْتُ","sharibtu"],["شَرِبوا","sharibu"],["شَرِبْنَ","sharibna"],["شَرِبْتُم","sharibtum"],["شَرِبْتُنَّ","sharibtunna"],["شَرِبْنا","sharibnaa"]],
-    present:[["يَشْرَبُ","yashrabu"],["تَشْرَبُ","tashrabu"],["تَشْرَبُ","tashrabu"],["تَشْرَبينَ","tashrabina"],["أَشْرَبُ","ashrabu"],["يَشْرَبونَ","yashrabuna"],["يَشْرَبْنَ","yashrabna"],["تَشْرَبونَ","tashrabuna"],["تَشْرَبْنَ","tashrabna"],["نَشْرَبُ","nashrabu"]]
+    present:[["يَشْرَبُ","yashrabu"],["تَشْرَبُ","tashrabu"],["تَشْرَبُ","tashrabu"],["تَشْرَبينَ","tashrabina"],["أَشْرَبُ","ashrabu"],["يَشْرَبونَ","yashrabuna"],["يَشْرَبْنَ","yashrabna"],["تَشْرَبونَ","tashrabuna"],["تَشْرَبْنَ","tashrabna"],["نَشْرَبُ","nashrabu"]],
+    command:[["اِشْرَبْ","ishrab"],["اِشْرَبِي","ishrabi"],["اِشْرَبوا","ishrabu"],["اِشْرَبْنَ","ishrabna"]]
   },
   { verb:"درس", t:"darasa", e:"to study", root:"د - ر - س", type:"regular", badge:"Regular (sound) verb", note:"Fully regular, a–u vowel pattern like كتب.",
     past:[["دَرَسَ","darasa"],["دَرَسَتْ","darasat"],["دَرَسْتَ","darasta"],["دَرَسْتِ","darasti"],["دَرَسْتُ","darastu"],["دَرَسوا","darasu"],["دَرَسْنَ","darasna"],["دَرَسْتُم","darastum"],["دَرَسْتُنَّ","darastunna"],["دَرَسْنا","darasnaa"]],
-    present:[["يَدْرُسُ","yadrusu"],["تَدْرُسُ","tadrusu"],["تَدْرُسُ","tadrusu"],["تَدْرُسينَ","tadrusina"],["أَدْرُسُ","adrusu"],["يَدْرُسونَ","yadrusuna"],["يَدْرُسْنَ","yadrusna"],["تَدْرُسونَ","tadrusuna"],["تَدْرُسْنَ","tadrusna"],["نَدْرُسُ","nadrusu"]]
+    present:[["يَدْرُسُ","yadrusu"],["تَدْرُسُ","tadrusu"],["تَدْرُسُ","tadrusu"],["تَدْرُسينَ","tadrusina"],["أَدْرُسُ","adrusu"],["يَدْرُسونَ","yadrusuna"],["يَدْرُسْنَ","yadrusna"],["تَدْرُسونَ","tadrusuna"],["تَدْرُسْنَ","tadrusna"],["نَدْرُسُ","nadrusu"]],
+    command:[["اُدْرُسْ","udrus"],["اُدْرُسِي","udrusi"],["اُدْرُسوا","udrusu"],["اُدْرُسْنَ","udrusna"]]
   },
   { verb:"جلس", t:"jalasa", e:"to sit", root:"ج - ل - س", type:"regular", badge:"Regular (sound) verb", note:"Fully regular, a–i vowel pattern.",
     past:[["جَلَسَ","jalasa"],["جَلَسَتْ","jalasat"],["جَلَسْتَ","jalasta"],["جَلَسْتِ","jalasti"],["جَلَسْتُ","jalastu"],["جَلَسوا","jalasu"],["جَلَسْنَ","jalasna"],["جَلَسْتُم","jalastum"],["جَلَسْتُنَّ","jalastunna"],["جَلَسْنا","jalasnaa"]],
-    present:[["يَجْلِسُ","yajlisu"],["تَجْلِسُ","tajlisu"],["تَجْلِسُ","tajlisu"],["تَجْلِسينَ","tajlisina"],["أَجْلِسُ","ajlisu"],["يَجْلِسونَ","yajlisuna"],["يَجْلِسْنَ","yajlisna"],["تَجْلِسونَ","tajlisuna"],["تَجْلِسْنَ","tajlisna"],["نَجْلِسُ","najlisu"]]
+    present:[["يَجْلِسُ","yajlisu"],["تَجْلِسُ","tajlisu"],["تَجْلِسُ","tajlisu"],["تَجْلِسينَ","tajlisina"],["أَجْلِسُ","ajlisu"],["يَجْلِسونَ","yajlisuna"],["يَجْلِسْنَ","yajlisna"],["تَجْلِسونَ","tajlisuna"],["تَجْلِسْنَ","tajlisna"],["نَجْلِسُ","najlisu"]],
+    command:[["اِجْلِسْ","ijlis"],["اِجْلِسِي","ijlisi"],["اِجْلِسوا","ijlisu"],["اِجْلِسْنَ","ijlisna"]]
   },
   { verb:"خرج", t:"kharaja", e:"to exit / go out", root:"خ - ر - ج", type:"regular", badge:"Regular (sound) verb", note:"Fully regular, a–u vowel pattern.",
     past:[["خَرَجَ","kharaja"],["خَرَجَتْ","kharajat"],["خَرَجْتَ","kharajta"],["خَرَجْتِ","kharajti"],["خَرَجْتُ","kharajtu"],["خَرَجوا","kharaju"],["خَرَجْنَ","kharajna"],["خَرَجْتُم","kharajtum"],["خَرَجْتُنَّ","kharajtunna"],["خَرَجْنا","kharajnaa"]],
-    present:[["يَخْرُجُ","yakhruju"],["تَخْرُجُ","takhruju"],["تَخْرُجُ","takhruju"],["تَخْرُجينَ","takhrujina"],["أَخْرُجُ","akhruju"],["يَخْرُجونَ","yakhrujuna"],["يَخْرُجْنَ","yakhrujna"],["تَخْرُجونَ","takhrujuna"],["تَخْرُجْنَ","takhrujna"],["نَخْرُجُ","nakhruju"]]
+    present:[["يَخْرُجُ","yakhruju"],["تَخْرُجُ","takhruju"],["تَخْرُجُ","takhruju"],["تَخْرُجينَ","takhrujina"],["أَخْرُجُ","akhruju"],["يَخْرُجونَ","yakhrujuna"],["يَخْرُجْنَ","yakhrujna"],["تَخْرُجونَ","takhrujuna"],["تَخْرُجْنَ","takhrujna"],["نَخْرُجُ","nakhruju"]],
+    command:[["اُخْرُجْ","ukhruj"],["اُخْرُجِي","ukhruji"],["اُخْرُجوا","ukhruju"],["اُخْرُجْنَ","ukhrujna"]]
   },
   { verb:"سمع", t:"sami'a", e:"to hear", root:"س - م - ع", type:"regular", badge:"Regular (sound) verb", note:"Fully regular, i–a vowel pattern like فهم.",
     past:[["سَمِعَ","sami'a"],["سَمِعَتْ","sami'at"],["سَمِعْتَ","sami'ta"],["سَمِعْتِ","sami'ti"],["سَمِعْتُ","sami'tu"],["سَمِعوا","sami'u"],["سَمِعْنَ","sami'na"],["سَمِعْتُم","sami'tum"],["سَمِعْتُنَّ","sami'tunna"],["سَمِعْنا","sami'naa"]],
-    present:[["يَسْمَعُ","yasma'u"],["تَسْمَعُ","tasma'u"],["تَسْمَعُ","tasma'u"],["تَسْمَعينَ","tasma'ina"],["أَسْمَعُ","asma'u"],["يَسْمَعونَ","yasma'una"],["يَسْمَعْنَ","yasma'na"],["تَسْمَعونَ","tasma'una"],["تَسْمَعْنَ","tasma'na"],["نَسْمَعُ","nasma'u"]]
+    present:[["يَسْمَعُ","yasma'u"],["تَسْمَعُ","tasma'u"],["تَسْمَعُ","tasma'u"],["تَسْمَعينَ","tasma'ina"],["أَسْمَعُ","asma'u"],["يَسْمَعونَ","yasma'una"],["يَسْمَعْنَ","yasma'na"],["تَسْمَعونَ","tasma'una"],["تَسْمَعْنَ","tasma'na"],["نَسْمَعُ","nasma'u"]],
+    command:[["اِسْمَعْ","isma'"],["اِسْمَعِي","isma'i"],["اِسْمَعوا","isma'u"],["اِسْمَعْنَ","isma'na"]]
   },
   { verb:"وجد", t:"wajada", e:"to find", root:"و - ج - د", type:"irregular", badge:"Assimilated verb (و-initial)", note:"The first root letter is و — and it vanishes completely in the present tense: وجد becomes يجد, not يوجد. The past tense stays regular.",
     past:[["وَجَدَ","wajada"],["وَجَدَتْ","wajadat"],["وَجَدْتَ","wajadta"],["وَجَدْتِ","wajadti"],["وَجَدْتُ","wajadtu"],["وَجَدوا","wajadu"],["وَجَدْنَ","wajadna"],["وَجَدْتُم","wajadtum"],["وَجَدْتُنَّ","wajadtunna"],["وَجَدْنا","wajadnaa"]],
-    present:[["يَجِدُ","yajidu"],["تَجِدُ","tajidu"],["تَجِدُ","tajidu"],["تَجِدينَ","tajidina"],["أَجِدُ","ajidu"],["يَجِدونَ","yajiduna"],["يَجِدْنَ","yajidna"],["تَجِدونَ","tajiduna"],["تَجِدْنَ","tajidna"],["نَجِدُ","najidu"]]
+    present:[["يَجِدُ","yajidu"],["تَجِدُ","tajidu"],["تَجِدُ","tajidu"],["تَجِدينَ","tajidina"],["أَجِدُ","ajidu"],["يَجِدونَ","yajiduna"],["يَجِدْنَ","yajidna"],["تَجِدونَ","tajiduna"],["تَجِدْنَ","tajidna"],["نَجِدُ","najidu"]],
+    command:[["جِدْ","jid"],["جِدِي","jidi"],["جِدوا","jidu"],["جِدْنَ","jidna"]]
   },
   { verb:"وصل", t:"wasala", e:"to arrive", root:"و - ص - ل", type:"irregular", badge:"Assimilated verb (و-initial)", note:"Same assimilated pattern as وجد above — the initial و drops in the present tense: وصل becomes يصل, not يوصل.",
     past:[["وَصَلَ","wasala"],["وَصَلَتْ","wasalat"],["وَصَلْتَ","wasalta"],["وَصَلْتِ","wasalti"],["وَصَلْتُ","wasaltu"],["وَصَلوا","wasalu"],["وَصَلْنَ","wasalna"],["وَصَلْتُم","wasaltum"],["وَصَلْتُنَّ","wasaltunna"],["وَصَلْنا","wasalnaa"]],
-    present:[["يَصِلُ","yasilu"],["تَصِلُ","tasilu"],["تَصِلُ","tasilu"],["تَصِلينَ","tasilina"],["أَصِلُ","asilu"],["يَصِلونَ","yasiluna"],["يَصِلْنَ","yasilna"],["تَصِلونَ","tasiluna"],["تَصِلْنَ","tasilna"],["نَصِلُ","nasilu"]]
+    present:[["يَصِلُ","yasilu"],["تَصِلُ","tasilu"],["تَصِلُ","tasilu"],["تَصِلينَ","tasilina"],["أَصِلُ","asilu"],["يَصِلونَ","yasiluna"],["يَصِلْنَ","yasilna"],["تَصِلونَ","tasiluna"],["تَصِلْنَ","tasilna"],["نَصِلُ","nasilu"]],
+    command:[["صِلْ","sil"],["صِلِي","sili"],["صِلوا","silu"],["صِلْنَ","silna"]]
   },
   { verb:"مدّ", t:"madda", e:"to extend / stretch", root:"م - د - د", type:"irregular", badge:"Geminate (doubled) verb", note:"The last two root letters are identical (د-د), merged into one doubled letter with a shadda — but that doubling splits apart the instant a suffix starting with a bare consonant is added: مَدَّ becomes مَدَدْتُ, not \"maddtu.\" Watch the 3rd-person forms (هو/هي/هم) stay merged while everyone else separates.",
     past:[["مَدَّ","madda"],["مَدَّتْ","maddat"],["مَدَدْتَ","madadta"],["مَدَدْتِ","madadti"],["مَدَدْتُ","madadtu"],["مَدّوا","maddu"],["مَدَدْنَ","madadna"],["مَدَدْتُم","madadtum"],["مَدَدْتُنَّ","madadtunna"],["مَدَدْنا","madadnaa"]],
-    present:[["يَمُدُّ","yamuddu"],["تَمُدُّ","tamuddu"],["تَمُدُّ","tamuddu"],["تَمُدِّينَ","tamuddina"],["أَمُدُّ","amuddu"],["يَمُدّونَ","yamudduna"],["يَمْدُدْنَ","yamdudna"],["تَمُدّونَ","tamudduna"],["تَمْدُدْنَ","tamdudna"],["نَمُدُّ","namuddu"]]
+    present:[["يَمُدُّ","yamuddu"],["تَمُدُّ","tamuddu"],["تَمُدُّ","tamuddu"],["تَمُدِّينَ","tamuddina"],["أَمُدُّ","amuddu"],["يَمُدّونَ","yamudduna"],["يَمْدُدْنَ","yamdudna"],["تَمُدّونَ","tamudduna"],["تَمْدُدْنَ","tamdudna"],["نَمُدُّ","namuddu"]],
+    command:[["مُدَّ","mudda"],["مُدِّي","muddi"],["مُدّوا","muddu"],["اُمْدُدْنَ","umdudna"]]
   },
   { verb:"درّس", t:"darrasa", e:"to teach", root:"د - ر - س", type:"derived", form:"II", badge:"Form II — Causative/Intensive", note:"Form II doubles the middle root letter with a shadda — دَرَّسَ literally means \"to make [someone] study,\" which is exactly how \"to teach\" works: you're causing the studying. Compare to Form I دَرَسَ (darasa, \"to study\") from the same root.",
     past:[["دَرَّسَ","darrasa"],["دَرَّسَتْ","darrasat"],["دَرَّسْتَ","darrasta"],["دَرَّسْتِ","darrasti"],["دَرَّسْتُ","darrastu"],["دَرَّسوا","darrasu"],["دَرَّسْنَ","darrasna"],["دَرَّسْتُم","darrastum"],["دَرَّسْتُنَّ","darrastunna"],["دَرَّسْنا","darrasnaa"]],
-    present:[["يُدَرِّسُ","yudarrisu"],["تُدَرِّسُ","tudarrisu"],["تُدَرِّسُ","tudarrisu"],["تُدَرِّسينَ","tudarrisina"],["أُدَرِّسُ","udarrisu"],["يُدَرِّسونَ","yudarrisuna"],["يُدَرِّسْنَ","yudarrisna"],["تُدَرِّسونَ","tudarrisuna"],["تُدَرِّسْنَ","tudarrisna"],["نُدَرِّسُ","nudarrisu"]]
+    present:[["يُدَرِّسُ","yudarrisu"],["تُدَرِّسُ","tudarrisu"],["تُدَرِّسُ","tudarrisu"],["تُدَرِّسينَ","tudarrisina"],["أُدَرِّسُ","udarrisu"],["يُدَرِّسونَ","yudarrisuna"],["يُدَرِّسْنَ","yudarrisna"],["تُدَرِّسونَ","tudarrisuna"],["تُدَرِّسْنَ","tudarrisna"],["نُدَرِّسُ","nudarrisu"]],
+    command:[["دَرِّسْ","darris"],["دَرِّسِي","darrisi"],["دَرِّسوا","darrisu"],["دَرِّسْنَ","darrisna"]]
   },
   { verb:"شاهد", t:"shahada", e:"to watch", root:"ش - ه - د", type:"derived", form:"III", badge:"Form III — Reciprocal/Effort", note:"Form III adds a long ا after the first root letter and usually implies doing something toward or with someone/something — \"watching\" fits as directing attention at something. Many Form III verbs describe interaction: kataba (I, to write) → kaataba (III, to correspond with).",
     past:[["شَاهَدَ","shahada"],["شَاهَدَتْ","shahadat"],["شَاهَدْتَ","shahadta"],["شَاهَدْتِ","shahadti"],["شَاهَدْتُ","shahadtu"],["شَاهَدوا","shahadu"],["شَاهَدْنَ","shahadna"],["شَاهَدْتُم","shahadtum"],["شَاهَدْتُنَّ","shahadtunna"],["شَاهَدْنا","shahadnaa"]],
-    present:[["يُشَاهِدُ","yushahidu"],["تُشَاهِدُ","tushahidu"],["تُشَاهِدُ","tushahidu"],["تُشَاهِدينَ","tushahidina"],["أُشَاهِدُ","ushahidu"],["يُشَاهِدونَ","yushahiduna"],["يُشَاهِدْنَ","yushahidna"],["تُشَاهِدونَ","tushahiduna"],["تُشَاهِدْنَ","tushahidna"],["نُشَاهِدُ","nushahidu"]]
+    present:[["يُشَاهِدُ","yushahidu"],["تُشَاهِدُ","tushahidu"],["تُشَاهِدُ","tushahidu"],["تُشَاهِدينَ","tushahidina"],["أُشَاهِدُ","ushahidu"],["يُشَاهِدونَ","yushahiduna"],["يُشَاهِدْنَ","yushahidna"],["تُشَاهِدونَ","tushahiduna"],["تُشَاهِدْنَ","tushahidna"],["نُشَاهِدُ","nushahidu"]],
+    command:[["شَاهِدْ","shahid"],["شَاهِدِي","shahidi"],["شَاهِدوا","shahidu"],["شَاهِدْنَ","shahidna"]]
   },
   { verb:"أرسل", t:"arsala", e:"to send", root:"ر - س - ل", type:"derived", form:"IV", badge:"Form IV — Causative", note:"Form IV prefixes a hamza and is almost always causative — \"to send\" is literally \"to make [something] go.\" This is one of the most common derived patterns in the whole language.",
     past:[["أَرْسَلَ","arsala"],["أَرْسَلَتْ","arsalat"],["أَرْسَلْتَ","arsalta"],["أَرْسَلْتِ","arsalti"],["أَرْسَلْتُ","arsaltu"],["أَرْسَلوا","arsalu"],["أَرْسَلْنَ","arsalna"],["أَرْسَلْتُم","arsaltum"],["أَرْسَلْتُنَّ","arsaltunna"],["أَرْسَلْنا","arsalnaa"]],
-    present:[["يُرْسِلُ","yursilu"],["تُرْسِلُ","tursilu"],["تُرْسِلُ","tursilu"],["تُرْسِلينَ","tursilina"],["أُرْسِلُ","ursilu"],["يُرْسِلونَ","yursiluna"],["يُرْسِلْنَ","yursilna"],["تُرْسِلونَ","tursiluna"],["تُرْسِلْنَ","tursilna"],["نُرْسِلُ","nursilu"]]
+    present:[["يُرْسِلُ","yursilu"],["تُرْسِلُ","tursilu"],["تُرْسِلُ","tursilu"],["تُرْسِلينَ","tursilina"],["أُرْسِلُ","ursilu"],["يُرْسِلونَ","yursiluna"],["يُرْسِلْنَ","yursilna"],["تُرْسِلونَ","tursiluna"],["تُرْسِلْنَ","tursilna"],["نُرْسِلُ","nursilu"]],
+    command:[["أَرْسِلْ","arsil"],["أَرْسِلِي","arsili"],["أَرْسِلوا","arsilu"],["أَرْسِلْنَ","arsilna"]]
   },
   { verb:"تعلّم", t:"ta'allama", e:"to learn", root:"ع - ل - م", type:"derived", form:"V", badge:"Form V — Reflexive of II", note:"Form V adds تَـ to Form II and usually turns a causative verb reflexive — تَعَلَّمَ (\"to learn\") is literally the reflexive of عَلَّمَ (Form II, \"to teach\"): to have the teaching happen to yourself.",
     past:[["تَعَلَّمَ","ta'allama"],["تَعَلَّمَتْ","ta'allamat"],["تَعَلَّمْتَ","ta'allamta"],["تَعَلَّمْتِ","ta'allamti"],["تَعَلَّمْتُ","ta'allamtu"],["تَعَلَّموا","ta'allamu"],["تَعَلَّمْنَ","ta'allamna"],["تَعَلَّمْتُم","ta'allamtum"],["تَعَلَّمْتُنَّ","ta'allamtunna"],["تَعَلَّمْنا","ta'allamnaa"]],
-    present:[["يَتَعَلَّمُ","yata'allamu"],["تَتَعَلَّمُ","tata'allamu"],["تَتَعَلَّمُ","tata'allamu"],["تَتَعَلَّمينَ","tata'allamina"],["أَتَعَلَّمُ","ata'allamu"],["يَتَعَلَّمونَ","yata'allamuna"],["يَتَعَلَّمْنَ","yata'allamna"],["تَتَعَلَّمونَ","tata'allamuna"],["تَتَعَلَّمْنَ","tata'allamna"],["نَتَعَلَّمُ","nata'allamu"]]
+    present:[["يَتَعَلَّمُ","yata'allamu"],["تَتَعَلَّمُ","tata'allamu"],["تَتَعَلَّمُ","tata'allamu"],["تَتَعَلَّمينَ","tata'allamina"],["أَتَعَلَّمُ","ata'allamu"],["يَتَعَلَّمونَ","yata'allamuna"],["يَتَعَلَّمْنَ","yata'allamna"],["تَتَعَلَّمونَ","tata'allamuna"],["تَتَعَلَّمْنَ","tata'allamna"],["نَتَعَلَّمُ","nata'allamu"]],
+    command:[["تَعَلَّمْ","ta'allam"],["تَعَلَّمِي","ta'allami"],["تَعَلَّموا","ta'allamu"],["تَعَلَّمْنَ","ta'allamna"]]
   },
   { verb:"استخدم", t:"istakhdama", e:"to use", root:"خ - د - م", type:"derived", form:"X", badge:"Form X — Seeking/Requesting", note:"Form X prefixes اِسْتَـ and typically means \"to seek/request/consider X\" — اِسْتَخْدَمَ (\"to use\") comes from the same root as خِدْمة (\"service\"), so it's literally \"to seek service from.\" This is the pattern behind many تكنولوجيا words you already know: اِسْتَعْمَلَ, اِسْتَقْبَلَ, اِسْتَطَاعَ.",
     past:[["اِسْتَخْدَمَ","istakhdama"],["اِسْتَخْدَمَتْ","istakhdamat"],["اِسْتَخْدَمْتَ","istakhdamta"],["اِسْتَخْدَمْتِ","istakhdamti"],["اِسْتَخْدَمْتُ","istakhdamtu"],["اِسْتَخْدَموا","istakhdamu"],["اِسْتَخْدَمْنَ","istakhdamna"],["اِسْتَخْدَمْتُم","istakhdamtum"],["اِسْتَخْدَمْتُنَّ","istakhdamtunna"],["اِسْتَخْدَمْنا","istakhdamnaa"]],
-    present:[["يَسْتَخْدِمُ","yastakhdimu"],["تَسْتَخْدِمُ","tastakhdimu"],["تَسْتَخْدِمُ","tastakhdimu"],["تَسْتَخْدِمينَ","tastakhdimina"],["أَسْتَخْدِمُ","astakhdimu"],["يَسْتَخْدِمونَ","yastakhdimuna"],["يَسْتَخْدِمْنَ","yastakhdimna"],["تَسْتَخْدِمونَ","tastakhdimuna"],["تَسْتَخْدِمْنَ","tastakhdimna"],["نَسْتَخْدِمُ","nastakhdimu"]]
+    present:[["يَسْتَخْدِمُ","yastakhdimu"],["تَسْتَخْدِمُ","tastakhdimu"],["تَسْتَخْدِمُ","tastakhdimu"],["تَسْتَخْدِمينَ","tastakhdimina"],["أَسْتَخْدِمُ","astakhdimu"],["يَسْتَخْدِمونَ","yastakhdimuna"],["يَسْتَخْدِمْنَ","yastakhdimna"],["تَسْتَخْدِمونَ","tastakhdimuna"],["تَسْتَخْدِمْنَ","tastakhdimna"],["نَسْتَخْدِمُ","nastakhdimu"]],
+    command:[["اِسْتَخْدِمْ","istakhdim"],["اِسْتَخْدِمِي","istakhdimi"],["اِسْتَخْدِموا","istakhdimu"],["اِسْتَخْدِمْنَ","istakhdimna"]]
+  },
+  { verb:"دخل", t:"dakhala", e:"to enter", root:"د - خ - ل", type:"regular", badge:"Regular (sound) verb — direction", note:"A directional motion verb — \"Enter!\" (اُدْخُلْ) is one of the most naturally useful commands there is.",
+    past:[["دَخَلَ","dakhala"],["دَخَلَتْ","dakhalat"],["دَخَلْتَ","dakhalta"],["دَخَلْتِ","dakhalti"],["دَخَلْتُ","dakhaltu"],["دَخَلوا","dakhalu"],["دَخَلْنَ","dakhalna"],["دَخَلْتُم","dakhaltum"],["دَخَلْتُنَّ","dakhaltunna"],["دَخَلْنا","dakhalnaa"]],
+    present:[["يَدْخُلُ","yadkhulu"],["تَدْخُلُ","tadkhulu"],["تَدْخُلُ","tadkhulu"],["تَدْخُلينَ","tadkhulina"],["أَدْخُلُ","adkhulu"],["يَدْخُلونَ","yadkhuluna"],["يَدْخُلْنَ","yadkhulna"],["تَدْخُلونَ","tadkhuluna"],["تَدْخُلْنَ","tadkhulna"],["نَدْخُلُ","nadkhulu"]],
+    command:[["اُدْخُلْ","udkhul"],["اُدْخُلِي","udkhuli"],["اُدْخُلوا","udkhulu"],["اُدْخُلْنَ","udkhulna"]]
+  },
+  { verb:"رجع", t:"raja'a", e:"to return / go back", root:"ر - ج - ع", type:"regular", badge:"Regular (sound) verb — direction", note:"Another directional verb — \"Come back!\" (اِرْجِعْ) is what you'd say to call someone back.",
+    past:[["رَجَعَ","raja'a"],["رَجَعَتْ","raja'at"],["رَجَعْتَ","raja'ta"],["رَجَعْتِ","raja'ti"],["رَجَعْتُ","raja'tu"],["رَجَعوا","raja'u"],["رَجَعْنَ","raja'na"],["رَجَعْتُم","raja'tum"],["رَجَعْتُنَّ","raja'tunna"],["رَجَعْنا","raja'naa"]],
+    present:[["يَرْجِعُ","yarji'u"],["تَرْجِعُ","tarji'u"],["تَرْجِعُ","tarji'u"],["تَرْجِعينَ","tarji'ina"],["أَرْجِعُ","arji'u"],["يَرْجِعونَ","yarji'una"],["يَرْجِعْنَ","yarji'na"],["تَرْجِعونَ","tarji'una"],["تَرْجِعْنَ","tarji'na"],["نَرْجِعُ","narji'u"]],
+    command:[["اِرْجِعْ","irji'"],["اِرْجِعِي","irji'i"],["اِرْجِعوا","irji'u"],["اِرْجِعْنَ","irji'na"]]
+  },
+  { verb:"صعد", t:"sa'ida", e:"to go up / ascend", root:"ص - ع - د", type:"regular", badge:"Regular (sound) verb — direction", note:"Directional verb pair with نزل below — useful for stairs, elevators, and mountains alike.",
+    past:[["صَعِدَ","sa'ida"],["صَعِدَتْ","sa'idat"],["صَعِدْتَ","sa'idta"],["صَعِدْتِ","sa'idti"],["صَعِدْتُ","sa'idtu"],["صَعِدوا","sa'idu"],["صَعِدْنَ","sa'idna"],["صَعِدْتُم","sa'idtum"],["صَعِدْتُنَّ","sa'idtunna"],["صَعِدْنا","sa'idnaa"]],
+    present:[["يَصْعَدُ","yas'adu"],["تَصْعَدُ","tas'adu"],["تَصْعَدُ","tas'adu"],["تَصْعَدينَ","tas'adina"],["أَصْعَدُ","as'adu"],["يَصْعَدونَ","yas'aduna"],["يَصْعَدْنَ","yas'adna"],["تَصْعَدونَ","tas'aduna"],["تَصْعَدْنَ","tas'adna"],["نَصْعَدُ","nas'adu"]],
+    command:[["اِصْعَدْ","is'ad"],["اِصْعَدِي","is'adi"],["اِصْعَدوا","is'adu"],["اِصْعَدْنَ","is'adna"]]
+  },
+  { verb:"نزل", t:"nazala", e:"to go down / descend", root:"ن - ز - ل", type:"regular", badge:"Regular (sound) verb — direction", note:"The other half of the صعد/نزل pair — \"Go down!\" (اِنْزِلْ) or \"Get off!\" (as in exiting a bus or car).",
+    past:[["نَزَلَ","nazala"],["نَزَلَتْ","nazalat"],["نَزَلْتَ","nazalta"],["نَزَلْتِ","nazalti"],["نَزَلْتُ","nazaltu"],["نَزَلوا","nazalu"],["نَزَلْنَ","nazalna"],["نَزَلْتُم","nazaltum"],["نَزَلْتُنَّ","nazaltunna"],["نَزَلْنا","nazalnaa"]],
+    present:[["يَنْزِلُ","yanzilu"],["تَنْزِلُ","tanzilu"],["تَنْزِلُ","tanzilu"],["تَنْزِلينَ","tanzilina"],["أَنْزِلُ","anzilu"],["يَنْزِلونَ","yanziluna"],["يَنْزِلْنَ","yanzilna"],["تَنْزِلونَ","tanziluna"],["تَنْزِلْنَ","tanzilna"],["نَنْزِلُ","nanzilu"]],
+    command:[["اِنْزِلْ","inzil"],["اِنْزِلِي","inzili"],["اِنْزِلوا","inzilu"],["اِنْزِلْنَ","inzilna"]]
   }
 ];
 
@@ -2248,7 +2347,91 @@ function speak(text){
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ar-SA";
   utter.rate = 0.75;
+  const voice = getSelectedVoiceObject();
+  if(voice) utter.voice = voice;
   window.speechSynthesis.speak(utter);
+}
+
+/* ============================= VOICE SELECTION ============================= */
+// Available voices depend entirely on the device/browser — this just lets the
+// person pick among whatever Arabic voices their OS/browser actually has installed.
+const VOICE_KEY = "voice-v1";
+let selectedVoiceURI = null; // null = browser default
+function getArabicVoices(){
+  if(!("speechSynthesis" in window)) return [];
+  return window.speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().startsWith("ar"));
+}
+function getSelectedVoiceObject(){
+  if(!selectedVoiceURI) return null;
+  return getArabicVoices().find(v=>v.voiceURI===selectedVoiceURI) || null;
+}
+async function loadVoiceChoice(){
+  try{
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(VOICE_KEY, false);
+      if(res && res.value) selectedVoiceURI = JSON.parse(res.value);
+    } else if(STORAGE_BACKEND === "local"){
+      const raw = localStorage.getItem(VOICE_KEY);
+      if(raw) selectedVoiceURI = JSON.parse(raw);
+    } else if(_memoryStore[VOICE_KEY]){
+      selectedVoiceURI = JSON.parse(_memoryStore[VOICE_KEY]);
+    }
+  }catch(e){ /* none yet, default to browser default */ }
+}
+async function saveVoiceChoice(){
+  const json = JSON.stringify(selectedVoiceURI);
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(VOICE_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(VOICE_KEY, json);
+    else _memoryStore[VOICE_KEY] = json;
+  }catch(e){ console.warn("Voice choice save failed", e); }
+}
+function updateVoiceLabel(){
+  const label = document.getElementById("voiceLabel");
+  if(!label) return;
+  const v = getSelectedVoiceObject();
+  label.textContent = v ? v.name.split(" ").slice(0,2).join(" ") : "Default";
+}
+function renderVoicePanel(){
+  const panel = document.getElementById("voicePanel");
+  if(!panel) return;
+  const voices = getArabicVoices();
+  let html = `<div class="voice-panel-note">These are the Arabic voices your device currently has installed — this app doesn't bundle its own, it just uses your browser's built-in text-to-speech. More voices may be available in your device's accessibility/language settings.</div>`;
+  html += `<div class="voice-option${selectedVoiceURI===null?" selected":""}" data-uri="">
+    <span>🔈 Default (browser's choice)</span>
+  </div>`;
+  if(voices.length === 0){
+    html += `<div class="voice-panel-note">No additional Arabic voices detected yet — some browsers take a moment to list them, or your device may only have one.</div>`;
+  } else {
+    voices.forEach(v=>{
+      html += `<div class="voice-option${selectedVoiceURI===v.voiceURI?" selected":""}" data-uri="${v.voiceURI}">
+        <span>${v.name} (${v.lang})</span>
+        <button class="voice-option-test" data-test="${v.voiceURI}">▶ Test</button>
+      </div>`;
+    });
+  }
+  panel.innerHTML = html;
+  panel.querySelectorAll(".voice-option").forEach(opt=>{
+    opt.addEventListener("click", (e)=>{
+      if(e.target.classList.contains("voice-option-test")) return;
+      selectedVoiceURI = opt.dataset.uri || null;
+      saveVoiceChoice();
+      updateVoiceLabel();
+      renderVoicePanel();
+    });
+  });
+  panel.querySelectorAll(".voice-option-test").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const v = getArabicVoices().find(x=>x.voiceURI===btn.dataset.test);
+      if(v){
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance("مرحباً، هذا مثال على هذا الصوت.");
+        utter.voice = v; utter.lang = "ar-SA"; utter.rate = 0.75;
+        window.speechSynthesis.speak(utter);
+      }
+    });
+  });
 }
 
 /* ============================= HELPERS ============================= */
@@ -2706,6 +2889,27 @@ document.getElementById("tashkeelToggle").addEventListener("click", ()=>{
   document.getElementById("brandAr").textContent = showTashkeel ? BRAND_AR_TK : BRAND_AR;
   activeRerender();
 });
+document.getElementById("voiceToggle").addEventListener("click", (e)=>{
+  e.stopPropagation();
+  const panel = document.getElementById("voicePanel");
+  const isOpen = panel.style.display !== "none";
+  if(isOpen){ panel.style.display = "none"; }
+  else { renderVoicePanel(); panel.style.display = "block"; }
+});
+document.addEventListener("click", (e)=>{
+  const panel = document.getElementById("voicePanel");
+  const toggle = document.getElementById("voiceToggle");
+  if(panel && panel.style.display !== "none" && !panel.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)){
+    panel.style.display = "none";
+  }
+});
+if("speechSynthesis" in window){
+  window.speechSynthesis.addEventListener("voiceschanged", ()=>{
+    updateVoiceLabel();
+    const panel = document.getElementById("voicePanel");
+    if(panel && panel.style.display !== "none") renderVoicePanel();
+  });
+}
 
 /* ============================= DIFFICULTY ============================= */
 let selectedDifficulty = "mixed";
@@ -2893,7 +3097,7 @@ let conjState = { verb: null };
 
 function renderConjugations(){
   activeRerender = renderConjugations;
-  if(conjState.verb){ renderVerbDetail(conjState.verb); return; }
+  if(conjState.verb !== null && conjState.verb !== undefined){ renderVerbDetail(conjState.verb); return; }
 
   main.innerHTML = `
     <div class="hero" style="padding:6px 0 18px; text-align:left;">
@@ -2954,31 +3158,54 @@ function renderConjugations(){
 
     <div class="grammar-explainer">
       <h3>🔤 The six verb patterns</h3>
-      <p class="alpha-intro" style="margin-bottom:0;">Every Arabic verb falls into one of these six patterns, based on what's happening to its three root letters. Learn to spot which one you're looking at, and the badge on each verb card below will start to feel like useful information instead of a warning label.</p>
+      <p class="alpha-intro" style="margin-bottom:0;">Every Arabic verb falls into one of these six patterns, based on what's happening to its three root letters. Learn to spot which one you're looking at, and the badge on each verb card below will start to feel like useful information instead of a warning label. Tap any example word to hear it.</p>
       <div class="grammar-terms">
         <div class="grammar-term">
           <div class="term-name">1. Regular (sound)</div>
-          <div class="term-desc">All three root letters are strong consonants — no surprises, just apply the pattern directly. <span class="grammar-example">كتب، فهم، شرب، درس</span></div>
+          <div class="term-desc">All three root letters are strong consonants — no surprises, just apply the pattern directly. <span class="grammar-example" data-ex="كتب,فهم,شرب,درس"></span></div>
         </div>
         <div class="grammar-term">
           <div class="term-name">2. Hollow</div>
-          <div class="term-desc">The <em>middle</em> root letter is و or ي — it becomes a long vowel, then shortens before a suffix starting with a bare consonant. <span class="grammar-example">كان، قال</span></div>
+          <div class="term-desc">The <em>middle</em> root letter is و or ي — it becomes a long vowel, then shortens before a suffix starting with a bare consonant. <span class="grammar-example" data-ex="كان,قال"></span></div>
         </div>
         <div class="grammar-term">
           <div class="term-name">3. Defective</div>
-          <div class="term-desc">The <em>final</em> root letter is و or ي, creating a weak, shifting ending. <span class="grammar-example">رأى</span></div>
+          <div class="term-desc">The <em>final</em> root letter is و or ي, creating a weak, shifting ending. <span class="grammar-example" data-ex="رأى"></span></div>
         </div>
         <div class="grammar-term">
           <div class="term-name">4. Hamzated</div>
-          <div class="term-desc">One of the three root letters is a hamza (ء). Mostly regular — just needs careful spelling where hamzas combine. <span class="grammar-example">سأل، أكل</span></div>
+          <div class="term-desc">One of the three root letters is a hamza (ء). Mostly regular — just needs careful spelling where hamzas combine. <span class="grammar-example" data-ex="سأل,أكل"></span></div>
         </div>
         <div class="grammar-term">
           <div class="term-name">5. Assimilated</div>
-          <div class="term-desc">The <em>first</em> root letter is و, and it vanishes entirely in the present tense. <span class="grammar-example">وجد → يجد، وصل → يصل</span></div>
+          <div class="term-desc">The <em>first</em> root letter is و, and it vanishes entirely in the present tense. <span class="grammar-example" data-ex="وجد,يجد,وصل,يصل"></span></div>
         </div>
         <div class="grammar-term">
           <div class="term-name">6. Geminate (doubled)</div>
-          <div class="term-desc">The 2nd and 3rd root letters are identical, merging into one doubled letter — which splits apart before a bare-consonant suffix. <span class="grammar-example">مدّ → مَدَدْتُ</span></div>
+          <div class="term-desc">The 2nd and 3rd root letters are identical, merging into one doubled letter — which splits apart before a bare-consonant suffix. <span class="grammar-example" data-ex="مدّ,مَدَدْتُ"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grammar-explainer">
+      <h3>🚻 Telling masculine from feminine in a conjugated verb</h3>
+      <p class="alpha-intro" style="margin-bottom:14px;">You don't need to memorize the whole person table by rote — a handful of visual cues tell you the subject's gender at a glance, in both tenses.</p>
+      <div class="grammar-terms">
+        <div class="grammar-term">
+          <div class="term-name">Past tense: listen for ـتْ</div>
+          <div class="term-desc">A bare تْ tacked onto the end (no extra vowel) means "she": <span class="grammar-example" data-ex="كَتَبَتْ"></span> ("she wrote") vs. the plain root-ending <span class="grammar-example" data-ex="كَتَبَ"></span> ("he wrote") with nothing added.</div>
+        </div>
+        <div class="grammar-term">
+          <div class="term-name">Present tense: the تَـ...ينَ wrap</div>
+          <div class="term-desc">"You, feminine" is the only present-tense form with letters on <em>both</em> sides — تَـ prefix and ـينَ suffix together: <span class="grammar-example" data-ex="تَكْتُبِينَ"></span>. Drop the ـينَ and you're back to "he/you, masculine": <span class="grammar-example" data-ex="تَكْتُبُ"></span>.</div>
+        </div>
+        <div class="grammar-term">
+          <div class="term-name">Plurals: ونَ vs. ـنَ</div>
+          <div class="term-desc">A full ـونَ ending marks masculine plural (<span class="grammar-example" data-ex="يَكْتُبُونَ"></span>, "they write, m."); a bare ـنَ with nothing before it marks feminine plural (<span class="grammar-example" data-ex="يَكْتُبْنَ"></span>, "they write, f.") — that missing extra letter is the whole signal.</div>
+        </div>
+        <div class="grammar-term">
+          <div class="term-name">Command form follows the same logic</div>
+          <div class="term-desc">The imperative mirrors the present-tense pattern above: masculine singular is the bare stem (<span class="grammar-example" data-ex="اُكْتُبْ"></span>, "Write!" to a man), feminine singular adds ـي (<span class="grammar-example" data-ex="اُكْتُبِي"></span>).</div>
         </div>
       </div>
     </div>
@@ -2990,10 +3217,11 @@ function renderConjugations(){
     </div>
 
     <div class="section-label">Practice with real verbs</div>
-    <p class="alpha-intro" style="margin-bottom:20px;">Start with the ones tagged "Regular (sound) verb." The Form I irregulars each demonstrate one of the six patterns above. The Form II–X verbs are tagged with their form number — cross-check them against the table above.</p>
+    <p class="alpha-intro" style="margin-bottom:20px;">Start with the ones tagged "Regular (sound) verb." The Form I irregulars each demonstrate one of the six patterns above. The Form II–X verbs are tagged with their form number — cross-check them against the table above. A few are tagged "— direction" — verbs of motion, which pair naturally with the command form.</p>
     <div class="verb-grid" id="verbGrid"></div>
   `;
   renderFormsTable();
+  populateExampleChips();
 
   // pattern key (kataba / yaktubu reference table)
   const pk = document.getElementById("patternKey");
@@ -3078,6 +3306,15 @@ function renderConjugations(){
   });
 }
 
+function populateExampleChips(){
+  document.querySelectorAll(".grammar-example[data-ex]").forEach(el=>{
+    const words = el.dataset.ex.split(",");
+    el.innerHTML = words.map(w=>`<button class="example-chip" data-w="${w}">${w} 🔊</button>`).join(" ");
+    el.querySelectorAll(".example-chip").forEach(chip=>{
+      chip.addEventListener("click", ()=>speak(chip.dataset.w));
+    });
+  });
+}
 function renderFormsTable(){
   const el = document.getElementById("formsTable");
   if(!el) return;
@@ -3093,20 +3330,30 @@ function renderFormsTable(){
     { num:"IX", pattern:"اِفْعَلَّ", mean:"Colors and physical characteristics — a small, specific category.", ex:"اِحْمَرَّ", exT:"ihmarra", exE:"to turn red / blush" },
     { num:"X", pattern:"اِسْتَفْعَلَ", mean:"Seeking, requesting, or considering — \"to seek X.\"", ex:"اِسْتَخْدَمَ", exT:"istakhdama", exE:"to use" }
   ];
-  el.innerHTML = forms.map(f=>`
+  el.innerHTML = forms.map((f,i)=>`
     <div class="form-row">
       <div class="form-num">${f.num}</div>
       <div class="form-pattern">${f.pattern}</div>
       <div class="form-mean">${f.mean}</div>
-      <div class="form-ex"><span class="ar">${f.ex}</span><span class="form-ex-t">${f.exT} — ${f.exE}</span></div>
+      <div class="form-ex">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="ar">${f.ex}</span>
+          <button class="speak-btn form-speak-btn" data-i="${i}" title="Listen">🔊</button>
+        </div>
+        <span class="form-ex-t">${f.exT} — ${f.exE}</span>
+      </div>
     </div>
   `).join("");
+  el.querySelectorAll(".form-speak-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>speak(forms[parseInt(btn.dataset.i)].ex));
+  });
 }
 
 function renderVerbDetail(idx){
   const v = CONJUGATIONS[idx];
   main.innerHTML = `
     <div class="crumbs"><a data-nav="conj-home">Conjugations</a> <span>›</span> <span>${v.t}</span></div>
+    <button class="exit-btn" id="verbBackBtn" style="margin-bottom:16px;">← Back to all verbs</button>
     <div class="verb-detail-header">
       <div>
         <div class="v-ar">${v.verb}</div>
@@ -3126,10 +3373,15 @@ function renderVerbDetail(idx){
         <table class="conj-table"><thead><tr><th>Person</th><th>Form</th><th></th></tr></thead><tbody id="presBody"></tbody></table>
       </div>
     </div>
+    <div class="conj-tense-label" style="margin-top:24px;">Command — الأمر</div>
+    <p class="alpha-intro" style="margin-bottom:14px;">The imperative only exists for "you" — there's no way to command "he," "I," or "we" in the base form, so this table has just 4 rows instead of 10.</p>
+    <table class="conj-table" style="max-width:520px;"><thead><tr><th>Person</th><th>Form</th><th></th></tr></thead><tbody id="cmdBody"></tbody></table>
   `;
   main.querySelector('[data-nav="conj-home"]').addEventListener("click", ()=>{ conjState.verb = null; renderConjugations(); });
+  document.getElementById("verbBackBtn").addEventListener("click", ()=>{ conjState.verb = null; renderConjugations(); });
   const pastBody = document.getElementById("pastBody");
   const presBody = document.getElementById("presBody");
+  const cmdBody = document.getElementById("cmdBody");
   const personCellHtml = p => `
     <div class="person-cell">
       <span>${personLabel(p)}</span>
@@ -3152,8 +3404,18 @@ function renderVerbDetail(idx){
         <td style="width:36px;"><button class="speak-btn" title="Listen">🔊</button></td>
       </tr>`;
   });
+  const cmdPersonIdx = [2,3,7,8]; // أنتَ, أنتِ, أنتم, أنتنّ — the only persons that take a command form
+  v.command.forEach((f,i)=>{
+    cmdBody.innerHTML += `
+      <tr>
+        <td class="person-lbl">${personCellHtml(PERSONS[cmdPersonIdx[i]])}</td>
+        <td><div class="form-ar">${f[0]}</div><div class="form-t">${f[1]}</div></td>
+        <td style="width:36px;"><button class="speak-btn" title="Listen">🔊</button></td>
+      </tr>`;
+  });
   pastBody.querySelectorAll(".speak-btn").forEach((btn,i)=>btn.addEventListener("click", ()=>speak(v.past[i][0])));
   presBody.querySelectorAll(".speak-btn").forEach((btn,i)=>btn.addEventListener("click", ()=>speak(v.present[i][0])));
+  cmdBody.querySelectorAll(".speak-btn").forEach((btn,i)=>btn.addEventListener("click", ()=>speak(v.command[i][0])));
 }
 
 /* ============================= RENDER: ROOTS ============================= */
@@ -3162,7 +3424,7 @@ function renderRoots(){
   main.innerHTML = `
     <div class="hero" style="padding:6px 0 18px; text-align:left;">
       <h1 class="hero-title" style="margin-top:0;">Word <em>roots</em></h1>
-      <p class="alpha-intro">This is the idea from the Conjugations page's grammar explainer, put into practice: every word below shares three consonants with all the others in its card — the root — and each one dresses that same core meaning in a different grammatical pattern (verb, doer-of-the-action, place-where-it-happens, tool, and so on). Recognizing a root you already know is often the fastest way to guess a brand-new word's general meaning.</p>
+      <p class="alpha-intro">This is the idea from the Conjugations page's grammar explainer, put into practice: every word below shares three consonants with all the others in its card — the root — and each one dresses that same core meaning in a different grammatical pattern (verb, doer-of-the-action, place-where-it-happens, tool, and so on). Recognizing a root you already know is often the fastest way to guess a brand-new word's general meaning. Tap any speaker icon to hear it.</p>
     </div>
     <div class="root-grid" id="rootGrid"></div>
   `;
@@ -3173,13 +3435,17 @@ function renderRoots(){
     card.innerHTML = `
       <div class="root-letters">${fam.root}</div>
       <div class="root-meaning">core idea: ${fam.meaning}</div>
-      ${fam.words.map(w=>`
+      ${fam.words.map((w,i)=>`
         <div class="root-word-row">
           <span class="root-word-ar">${w.a}</span>
           <span class="root-word-meta">${w.t} — ${w.e}</span>
+          <button class="speak-btn root-speak-btn" data-i="${i}" title="Listen">🔊</button>
         </div>
       `).join("")}
     `;
+    card.querySelectorAll(".root-speak-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>speak(fam.words[parseInt(btn.dataset.i)].a));
+    });
     grid.appendChild(card);
   });
 }
@@ -3640,27 +3906,201 @@ function allWordsFromWholeCategory(cat){
 }
 
 /* ============================= SENTENCES ============================= */
+/* ============================= RENDER: SENTENCES HUB ============================= */
+function renderSentencesHub(){
+  activeRerender = renderSentencesHub;
+  main.innerHTML = `
+    <div class="hero" style="padding:6px 0 18px; text-align:left;">
+      <h1 class="hero-title" style="margin-top:0;">Sentence <em>practice</em></h1>
+      <p class="alpha-intro">Every one of the 1,725 words in this app comes with a real example sentence. Jump into quick random practice or a meaning quiz across everything, or browse by topic below to focus on one category at a time.</p>
+    </div>
+    <div class="sent-hub-actions">
+      <button class="sent-hub-btn primary" id="spAllBtn">
+        <span class="sent-hub-icon">🎲</span>
+        <span>
+          <span class="sent-hub-title">Random Sentence Practice</span>
+          <span class="sent-hub-sub">All 1,725 sentences, mixed</span>
+        </span>
+      </button>
+      <button class="sent-hub-btn teal" id="sqAllBtn">
+        <span class="sent-hub-icon">🎯</span>
+        <span>
+          <span class="sent-hub-title">Sentence Meaning Quiz</span>
+          <span class="sent-hub-sub">Multiple choice, all 1,725</span>
+        </span>
+      </button>
+    </div>
+    <div class="section-label">Browse sentences by topic</div>
+    <p class="alpha-intro" style="margin-bottom:20px;">Pick a category, then a subcategory — every subcategory's Sentences page has its own random practice and quiz too, scoped to just that topic.</p>
+    <div class="cat-grid" id="sentCatGrid"></div>
+  `;
+  document.getElementById("spAllBtn").addEventListener("click", ()=>startSentencePractice(allWords(), "All Sentences"));
+  document.getElementById("sqAllBtn").addEventListener("click", ()=>startSentenceQuiz(allWords(), "All Sentences"));
+  const grid = document.getElementById("sentCatGrid");
+  DATA.categories.forEach(c=>{
+    const count = c.subs.reduce((s,sub)=>s+sub.words.length,0);
+    const card = document.createElement("div");
+    card.className="cat-card";
+    card.innerHTML = `
+      <span class="icon">${c.icon}</span>
+      <span class="name-ar">${displayArName(c)}</span>
+      <span class="name-en">${c.en}</span>
+      <div class="count">${count} sentences · ${c.subs.length} subcategories</div>
+      <span class="diff-badge ${c.diff}">${DIFF_META[c.diff].label}</span>
+    `;
+    card.addEventListener("click", ()=>renderCategory(c.id));
+    grid.appendChild(card);
+  });
+}
+
+/* ============================= RENDER: RANDOM SENTENCE PRACTICE ============================= */
+let spState = {};
+function startSentencePractice(words, label, catId, subId){
+  spState = { pool: words, label, catId, subId, current: null, revealed: false, count: 0 };
+  nextRandomSentence();
+}
+function nextRandomSentence(){
+  spState.current = spState.pool[Math.floor(Math.random()*spState.pool.length)];
+  spState.revealed = false;
+  renderSentencePractice();
+}
+function renderSentencePractice(){
+  activeRerender = renderSentencePractice;
+  const w = spState.current;
+  main.innerHTML = `
+    <div class="crumbs">${spState.catId ? crumbHtmlForSentences(spState) : '<a data-nav="sent-hub">Sentences</a> <span>›</span> <span>Random Practice</span>'}</div>
+    <div class="quiz-wrap">
+      <div class="quiz-top-row">
+        <div class="quiz-score">🎲 ${spState.label} · ${spState.count} practiced</div>
+        <button class="exit-btn" id="spExitBtn" title="Exit">✕ Exit</button>
+      </div>
+      <div class="sentence-practice-card">
+        <div class="sentence-ar sentence-ar-centered">${highlightSentence(w)}<button class="speak-btn" id="spSpeakBtn" title="Listen">🔊</button></div>
+        <div id="spRevealArea">
+          ${spState.revealed
+            ? `<div class="sentence-en show" style="margin-top:16px;">${w.x}</div>`
+            : `<button class="btn primary" id="spRevealBtn" style="margin-top:16px;">Show meaning</button>`}
+        </div>
+      </div>
+      <div style="margin-top:20px; text-align:center;">
+        <button class="btn teal" id="spNextBtn">🎲 Next random sentence →</button>
+      </div>
+    </div>
+  `;
+  bindCrumbs();
+  const homeCrumb = main.querySelector('[data-nav="sent-hub"]');
+  if(homeCrumb) homeCrumb.addEventListener("click", renderSentencesHub);
+  document.getElementById("spSpeakBtn").addEventListener("click", ()=>speak(w.s));
+  const revealBtn = document.getElementById("spRevealBtn");
+  if(revealBtn) revealBtn.addEventListener("click", ()=>{ spState.revealed = true; renderSentencePractice(); });
+  document.getElementById("spNextBtn").addEventListener("click", ()=>{ spState.count++; nextRandomSentence(); });
+  document.getElementById("spExitBtn").addEventListener("click", ()=>{
+    if(spState.catId) renderCategory(spState.catId);
+    else renderSentencesHub();
+  });
+}
+
+/* ============================= RENDER: SENTENCE MEANING QUIZ ============================= */
+let sqState = {};
+function startSentenceQuiz(words, label, catId, subId){
+  sqState = { pool: words, label, catId, subId, score:0, asked:0, current:null, options:null, answered:false };
+  nextSentenceQuizQuestion();
+}
+function nextSentenceQuizQuestion(){
+  sqState.current = sqState.pool[Math.floor(Math.random()*sqState.pool.length)];
+  const others = sqState.pool.filter(w=>w.x !== sqState.current.x);
+  const distractors = shuffle(others).slice(0,3).map(w=>w.x);
+  sqState.options = shuffle([sqState.current.x, ...distractors]);
+  sqState.answered = false;
+  sqState.asked++;
+  renderSentenceQuiz();
+}
+function renderSentenceQuiz(){
+  activeRerender = renderSentenceQuiz;
+  const w = sqState.current;
+  main.innerHTML = `
+    <div class="crumbs">${sqState.catId ? crumbHtmlForSentences(sqState) : '<a data-nav="sent-hub">Sentences</a> <span>›</span> <span>Meaning Quiz</span>'}</div>
+    <div class="quiz-wrap">
+      <div class="quiz-top-row">
+        <div class="quiz-score">🎯 ${sqState.label} · Question ${sqState.asked} · Score ${sqState.score}</div>
+        <button class="exit-btn" id="sqExitBtn" title="Exit">✕ Exit</button>
+      </div>
+      <div class="sentence-ar sentence-ar-centered" style="margin-bottom:6px;">${highlightSentence(w)}<button class="speak-btn" id="sqSpeakBtn" title="Listen">🔊</button></div>
+      <div class="quiz-direction-label" style="text-align:center;">Choose the correct meaning:</div>
+      <div class="quiz-options" id="sqOptions"></div>
+      <div class="quiz-next" id="sqNextWrap" style="display:none; text-align:center;"><button class="btn primary" id="sqNext">Next →</button></div>
+    </div>
+  `;
+  bindCrumbs();
+  const homeCrumb = main.querySelector('[data-nav="sent-hub"]');
+  if(homeCrumb) homeCrumb.addEventListener("click", renderSentencesHub);
+  document.getElementById("sqSpeakBtn").addEventListener("click", ()=>speak(w.s));
+  document.getElementById("sqExitBtn").addEventListener("click", ()=>{
+    if(sqState.catId) renderCategory(sqState.catId);
+    else renderSentencesHub();
+  });
+  const optWrap = document.getElementById("sqOptions");
+  sqState.options.forEach(optText=>{
+    const btn = document.createElement("div");
+    btn.className = "quiz-opt";
+    btn.textContent = optText;
+    btn.addEventListener("click", ()=>{
+      if(sqState.answered) return;
+      sqState.answered = true;
+      const correct = optText === w.x;
+      if(correct) sqState.score++;
+      document.querySelectorAll("#sqOptions .quiz-opt").forEach(o=>{
+        o.classList.add("disabled");
+        if(o.textContent === w.x) o.classList.add("correct");
+        else if(o.textContent === optText) o.classList.add("wrong");
+      });
+      document.getElementById("sqNextWrap").style.display="block";
+    });
+    optWrap.appendChild(btn);
+  });
+  document.getElementById("sqNext").addEventListener("click", nextSentenceQuizQuestion);
+}
+function crumbHtmlForSentences(s){
+  const cat = DATA.categories.find(c=>c.id===s.catId);
+  if(s.subId){
+    const sub = cat.subs.find(x=>x.id===s.subId);
+    return `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — ${s.label}</span>`;
+  }
+  return `<a data-nav="home">Categories</a> <span>›</span> <span>${cat.en} — ${s.label}</span>`;
+}
+
+/* ============================= RENDER: SENTENCES LIST (per subcategory or all) ============================= */
 function renderSentences(catId, subId){
   activeRerender = ()=>renderSentences(catId, subId);
-  let words;
+  let words, label;
   let crumbLabel;
   if(catId && subId){
     const cat = DATA.categories.find(c=>c.id===catId);
     const sub = cat.subs.find(s=>s.id===subId);
     words = sub.words;
+    label = sub.en;
     crumbLabel = `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Sentences</span>`;
   } else {
     words = allWords();
-    crumbLabel = `<span>All Sentences</span>`;
+    label = "All Sentences";
+    crumbLabel = `<a data-nav="sent-hub">Sentences</a> <span>›</span> <span>${catId ? DATA.categories.find(c=>c.id===catId).en+" — " : ""}List</span>`;
   }
   main.innerHTML = `
     <div class="crumbs">${crumbLabel}</div>
     <div class="section-label">Sentence practice</div>
-    <p style="color:var(--text-muted); font-size:14px; max-width:640px; margin-bottom:24px;">Every sentence uses a vocabulary word in context. Hover or tap any Arabic word for its meaning, and tap “Show translation” to check the full sentence.</p>
+    <div class="sent-mode-row">
+      <button class="btn primary" id="sentModeRandom">🎲 Random Practice</button>
+      <button class="btn teal" id="sentModeQuiz">🎯 Meaning Quiz</button>
+    </div>
+    <p style="color:var(--text-muted); font-size:14px; max-width:640px; margin-bottom:24px;">Every sentence uses a vocabulary word in context. Hover or tap any Arabic word for its meaning, and tap “Show translation” to check the full sentence. Or use the buttons above to practice actively instead of just browsing.</p>
     <div id="sentList"></div>
   `;
+  document.getElementById("sentModeRandom").addEventListener("click", ()=>startSentencePractice(words, label, catId, subId));
+  document.getElementById("sentModeQuiz").addEventListener("click", ()=>startSentenceQuiz(words, label, catId, subId));
   const homeCrumb = main.querySelector('[data-nav="home"]');
   if(homeCrumb) homeCrumb.addEventListener("click", ()=>setView("home"));
+  const sentHubCrumb = main.querySelector('[data-nav="sent-hub"]');
+  if(sentHubCrumb) sentHubCrumb.addEventListener("click", renderSentencesHub);
   const catCrumb = main.querySelector('[data-nav="cat"]');
   if(catCrumb) catCrumb.addEventListener("click", ()=>renderCategory(catCrumb.dataset.catid));
 
@@ -3669,11 +4109,14 @@ function renderSentences(catId, subId){
     const div = document.createElement("div");
     div.className="sentence-card";
     div.innerHTML = `
-      <div class="sentence-ar">${highlightSentence(w)}</div>
+      <div class="sentence-ar">${highlightSentence(w)}<button class="speak-btn sentence-speak-btn" data-idx="${idx}" title="Listen">🔊</button></div>
       <span class="sentence-toggle" data-idx="${idx}">Show translation ▾</span>
       <div class="sentence-en" id="sen-${idx}">${w.x}</div>
     `;
     list.appendChild(div);
+  });
+  list.querySelectorAll(".sentence-speak-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>speak(words[parseInt(btn.dataset.idx)].s));
   });
   list.querySelectorAll(".sentence-toggle").forEach(t=>{
     t.addEventListener("click", ()=>{
@@ -3692,7 +4135,7 @@ function highlightSentence(w){
 }
 
 /* sentences-all nav pill */
-document.querySelector('[data-view="sentences-all"]').addEventListener("click", ()=>renderSentences(null,null));
+document.querySelector('[data-view="sentences-all"]').addEventListener("click", ()=>renderSentencesHub());
 
 /* ============================= RENDER: REVIEW ============================= */
 function renderReview(){
@@ -4028,7 +4471,7 @@ document.addEventListener("touchend", (e)=>{
 function render(){
   if(state.view==="home") renderHome();
   else if(state.view==="category") renderCategory(state.catId);
-  else if(state.view==="sentences-all") renderSentences(null,null);
+  else if(state.view==="sentences-all") renderSentencesHub();
   else if(state.view==="alphabet") renderAlphabet();
   else if(state.view==="conjugations"){ conjState.verb=null; renderConjugations(); }
   else if(state.view==="review") renderReview();
@@ -4041,6 +4484,8 @@ function render(){
   buildWordsById();
   await loadProgress();
   await loadStreak();
+  await loadVoiceChoice();
+  updateVoiceLabel();
   render();
   initTimerWidget();
   // Service worker: only registers over HTTPS/localhost (browsers block it on file:// pages).

@@ -240,6 +240,8 @@
   .fc-controls .btn{padding:11px 18px; font-size:13px;}
   .fc-controls .btn.know{border-color:var(--good); color:var(--good);}
   .fc-controls .btn.know:hover{background:var(--good); color:var(--ink);}
+  .fc-controls .btn.back-btn{border-color:var(--text-muted); color:var(--text-muted);}
+  .fc-controls .btn.back-btn:hover{border-color:var(--text); color:var(--text);}
   .fc-controls .btn.again{border-color:var(--danger); color:var(--danger);}
   .fc-controls .btn.again:hover{background:var(--danger); color:var(--ink);}
 
@@ -1748,6 +1750,67 @@ const DATA = {
       ])}
     ]},
 
+    { id:"calendar-days-months", en:"Calendar: Days & Months", ar:"التقويم: الأيام والشهور", icon:"📆", diff:"easy", subs:[
+      { id:"days-of-week", en:"Days of the Week", ar:"أيام الأسبوع", words:[
+        {a:"الأحد", t:"al-ahad", e:"Sunday", p:"n", s:"أول أيام الأسبوع هو الأحد.", x:"The first day of the week is Sunday."},
+        {a:"الاثنين", t:"al-ithnayn", e:"Monday", p:"n", s:"تبدأ المدرسة يوم الاثنين.", x:"School starts on Monday."},
+        {a:"الثلاثاء", t:"ath-thulatha'", e:"Tuesday", p:"n", s:"لدي اجتماع يوم الثلاثاء.", x:"I have a meeting on Tuesday."},
+        {a:"الأربعاء", t:"al-arbi'a'", e:"Wednesday", p:"n", s:"منتصف الأسبوع هو الأربعاء.", x:"The middle of the week is Wednesday."},
+        {a:"الخميس", t:"al-khamis", e:"Thursday", p:"n", s:"سأسافر يوم الخميس.", x:"I will travel on Thursday."},
+        {a:"الجمعة", t:"al-jumu'a", e:"Friday", p:"n", s:"الجمعة يوم مهم عند المسلمين.", x:"Friday is an important day for Muslims."},
+        {a:"السبت", t:"as-sabt", e:"Saturday", p:"n", s:"نلعب كرة القدم يوم السبت.", x:"We play soccer on Saturday."},
+        {a:"عطلة نهاية الأسبوع", t:"utlat nihayat al-usbu'", e:"weekend", p:"n", s:"أستريح في عطلة نهاية الأسبوع.", x:"I rest on the weekend."},
+        {a:"يوم عمل", t:"yawm amal", e:"workday", p:"n", s:"غداً يوم عمل طويل.", x:"Tomorrow is a long workday."},
+        {a:"أسبوعياً", t:"usbu'iyyan", e:"weekly", p:"adv", s:"ننظف البيت أسبوعياً.", x:"We clean the house weekly."}
+      ]},
+      { id:"months-of-year", en:"Months of the Year", ar:"شهور السنة", words:[
+        {a:"يناير", t:"yanayir", e:"January", p:"n", s:"يناير هو الشهر الأول في السنة.", x:"January is the first month of the year."},
+        {a:"فبراير", t:"fibrayir", e:"February", p:"n", s:"فبراير شهر قصير.", x:"February is a short month."},
+        {a:"مارس", t:"maris", e:"March", p:"n", s:"يبدأ الربيع في مارس.", x:"Spring begins in March."},
+        {a:"أبريل", t:"abril", e:"April", p:"n", s:"أبريل شهر ممطر.", x:"April is a rainy month."},
+        {a:"مايو", t:"mayu", e:"May", p:"n", s:"أحب شهر مايو.", x:"I love the month of May."},
+        {a:"يونيو", t:"yunyu", e:"June", p:"n", s:"تنتهي المدرسة في يونيو.", x:"School ends in June."},
+        {a:"يوليو", t:"yulyu", e:"July", p:"n", s:"يوليو شهر حار جداً.", x:"July is a very hot month."},
+        {a:"أغسطس", t:"aghustus", e:"August", p:"n", s:"نسافر في أغسطس كل عام.", x:"We travel in August every year."},
+        {a:"سبتمبر", t:"sibtambir", e:"September", p:"n", s:"تبدأ الدراسة في سبتمبر.", x:"Studies begin in September."},
+        {a:"أكتوبر", t:"uktubar", e:"October", p:"n", s:"يبدأ الخريف في أكتوبر.", x:"Autumn begins in October."},
+        {a:"نوفمبر", t:"nufambir", e:"November", p:"n", s:"الطقس بارد في نوفمبر.", x:"The weather is cold in November."},
+        {a:"ديسمبر", t:"disambir", e:"December", p:"n", s:"ديسمبر هو الشهر الأخير في السنة.", x:"December is the last month of the year."}
+      ]}
+    ]},
+
+    { id:"numbers-ordinals-math", en:"Numbers II: Ordinals & Math", ar:"الأرقام الترتيبية والرياضيات", icon:"🔢", diff:"easy",
+      note:"Note on the months above: this is the standard set taught in most MSA textbooks and understood everywhere. In everyday speech, the Levant and Iraq commonly use a different, older set of month names (كانون الثاني، شباط، آذار...) instead — worth knowing exists if you're headed to that region specifically.",
+      subs:[
+      { id:"ordinal-numbers", en:"Ordinal Numbers", ar:"الأعداد الترتيبية", words:[
+        {a:"الأول", t:"al-awwal", e:"first", p:"adj", s:"هذا هو يومي الأول في العمل.", x:"This is my first day at work."},
+        {a:"الثاني", t:"ath-thani", e:"second", p:"adj", s:"هو في الصف الثاني.", x:"He is in the second grade."},
+        {a:"الثالث", t:"ath-thalith", e:"third", p:"adj", s:"سكنت في الطابق الثالث.", x:"I lived on the third floor."},
+        {a:"الرابع", t:"ar-rabi'", e:"fourth", p:"adj", s:"جاء في المركز الرابع.", x:"He came in fourth place."},
+        {a:"الخامس", t:"al-khamis", e:"fifth", p:"adj", s:"هذا هو الدرس الخامس.", x:"This is the fifth lesson."},
+        {a:"السادس", t:"as-sadis", e:"sixth", p:"adj", s:"ابني في الصف السادس.", x:"My son is in sixth grade."},
+        {a:"السابع", t:"as-sabi'", e:"seventh", p:"adj", s:"اليوم السابع هو يوم الراحة.", x:"The seventh day is the day of rest."},
+        {a:"الثامن", t:"ath-thamin", e:"eighth", p:"adj", s:"هذا هو الشهر الثامن.", x:"This is the eighth month."},
+        {a:"التاسع", t:"at-tasi'", e:"ninth", p:"adj", s:"وصل في المركز التاسع.", x:"He arrived in ninth place."},
+        {a:"العاشر", t:"al-ashir", e:"tenth", p:"adj", s:"هذا هو يومنا العاشر هنا.", x:"This is our tenth day here."},
+        {a:"الأخير", t:"al-akhir", e:"last", p:"adj", s:"هذا هو سؤالي الأخير.", x:"This is my last question."}
+      ]},
+      { id:"math-shapes-zero", en:"Math, Shapes & Zero", ar:"الرياضيات والأشكال والصفر", words:[
+        {a:"صفر", t:"sifr", e:"zero", p:"num", s:"العدد صفر ليس موجباً ولا سالباً.", x:"The number zero is neither positive nor negative."},
+        {a:"زائد", t:"za'id", e:"plus", p:"n", s:"اثنان زائد اثنان يساوي أربعة.", x:"Two plus two equals four."},
+        {a:"ناقص", t:"naqis", e:"minus", p:"n", s:"خمسة ناقص واحد يساوي أربعة.", x:"Five minus one equals four."},
+        {a:"ضرب", t:"darb", e:"times / multiplication", p:"n", s:"تعلمنا جدول الضرب في المدرسة.", x:"We learned the multiplication table at school."},
+        {a:"قسمة", t:"qisma", e:"division", p:"n", s:"القسمة عملية حسابية أساسية.", x:"Division is a basic arithmetic operation."},
+        {a:"يساوي", t:"yusawi", e:"equals", p:"v", s:"واحد زائد واحد يساوي اثنين.", x:"One plus one equals two."},
+        {a:"في المئة", t:"fi al-mi'a", e:"percent", p:"n", s:"خصم خمسين في المئة على كل شيء.", x:"Fifty percent off on everything."},
+        {a:"دائرة", t:"da'ira", e:"circle", p:"n", s:"رسم الطفل دائرة كبيرة.", x:"The child drew a big circle."},
+        {a:"مربع", t:"murabba'", e:"square", p:"n", s:"الشباك على شكل مربع.", x:"The window is square-shaped."},
+        {a:"مثلث", t:"muthallath", e:"triangle", p:"n", s:"المثلث له ثلاثة أضلاع.", x:"A triangle has three sides."},
+        {a:"مستطيل", t:"mustatil", e:"rectangle", p:"n", s:"الباب على شكل مستطيل.", x:"The door is rectangle-shaped."},
+        {a:"مكعب", t:"muka'ab", e:"cube", p:"n", s:"النرد على شكل مكعب.", x:"Dice are cube-shaped."}
+      ]}
+    ]},
+
     { id:"idioms-expressions", en:"Idioms & Expressions", ar:"التعابير الاصطلاحية", icon:"🗨️", diff:"hard",
       note:"Idioms don't translate word-for-word — that's the whole point of them. The literal meaning is given alongside the real meaning for the figurative ones below, so you can see how the image and the actual usage connect.",
       subs:[
@@ -2753,11 +2816,11 @@ let fcState = {};
 function startFlashcards(catId, subId){
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
-  fcState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, known:0 };
+  fcState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, known:0, history:[] };
   renderFlashcard();
 }
 function startFlashcardsSession(words, label){
-  fcState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, known:0 };
+  fcState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, known:0, history:[] };
   renderFlashcard();
 }
 
@@ -2765,6 +2828,27 @@ function crumbHtml(fs, suffix){
   return fs.cat
     ? `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat">${fs.cat.en}</a> <span>›</span> <span>${fs.sub.en}${suffix||""}</span>`
     : `<a data-nav="home">Categories</a> <span>›</span> <span>${fs.label}${suffix||""}</span>`;
+}
+
+// Snapshots the word's progress state before marking it, so "Back" can fully undo the mark —
+// not just visually go back, but actually restore the mastery/streak data too.
+function pushFcHistory(w){
+  fcState.history.push({
+    index: fcState.i,
+    wordId: w.id,
+    progressBefore: PROGRESS[w.id] ? JSON.parse(JSON.stringify(PROGRESS[w.id])) : null,
+    knownBefore: fcState.known
+  });
+}
+function undoLastFcAnswer(){
+  const entry = fcState.history.pop();
+  if(!entry) return false;
+  fcState.i = entry.index;
+  fcState.known = entry.knownBefore;
+  if(entry.progressBefore === null) delete PROGRESS[entry.wordId];
+  else PROGRESS[entry.wordId] = entry.progressBefore;
+  saveProgress();
+  return true;
 }
 
 function renderFlashcard(){
@@ -2776,6 +2860,7 @@ function renderFlashcard(){
         <div class="big">Deck complete!</div>
         <p style="color:var(--text-muted);">You reviewed ${fcState.deck.length} words · ${fcState.known} marked as known.</p>
         <div class="fc-controls" style="margin-top:20px;">
+          ${fcState.history.length>0 ? '<button class="btn" id="fcBackOne">← Back to last card</button>' : ""}
           <button class="btn primary" id="fcAgain">Practice again</button>
           <button class="btn teal" id="fcQuiz">Take the quiz</button>
           <button class="btn" id="fcBack">${fcState.cat ? "Back to subcategories" : "Back to categories"}</button>
@@ -2783,6 +2868,8 @@ function renderFlashcard(){
       </div>
     `;
     bindCrumbs();
+    const backOne = document.getElementById("fcBackOne");
+    if(backOne) backOne.addEventListener("click", ()=>{ undoLastFcAnswer(); renderFlashcard(); });
     document.getElementById("fcAgain").addEventListener("click", ()=>{
       if(fcState.cat) startFlashcards(fcState.cat.id, fcState.sub.id);
       else startFlashcardsSession(fcState.sourceWords, fcState.label);
@@ -2822,6 +2909,7 @@ function renderFlashcard(){
         </div>
       </div>
       <div class="fc-controls">
+        ${fcState.history.length>0 ? '<button class="btn back-btn" id="fcBackBtn">← Back</button>' : ""}
         <button class="btn again" id="fcAgainBtn">↺ Still learning</button>
         <button class="btn know" id="fcKnowBtn">✓ Got it</button>
       </div>
@@ -2831,13 +2919,20 @@ function renderFlashcard(){
   const cardEl = document.getElementById("fcCard");
   cardEl.addEventListener("click", ()=>cardEl.classList.toggle("flipped"));
   document.getElementById("fcSpeakBtn").addEventListener("click", (e)=>{ e.stopPropagation(); speak(w.tk || w.a); });
+  const backBtn = document.getElementById("fcBackBtn");
+  if(backBtn) backBtn.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    if(undoLastFcAnswer()) renderFlashcard();
+  });
   document.getElementById("fcKnowBtn").addEventListener("click", (e)=>{
     e.stopPropagation();
+    pushFcHistory(w);
     markResult(w, true);
     fcState.known++; fcState.i++; renderFlashcard();
   });
   document.getElementById("fcAgainBtn").addEventListener("click", (e)=>{
     e.stopPropagation();
+    pushFcHistory(w);
     const {demoted} = markResult(w, false);
     fcState.deck.push(w);
     if(demoted){

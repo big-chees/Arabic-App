@@ -124,6 +124,29 @@
   .hero-title em{color:var(--teal-soft); font-style:normal;}
   .hero-desc{color:var(--text-muted); font-size:15px; max-width:560px; margin:0 auto 22px; line-height:1.6;}
   .hero-stats{display:flex; gap:30px; justify-content:center; margin-top:18px; flex-wrap:wrap;}
+  .streak-sub{text-align:center; font-size:11.5px; color:var(--text-muted); margin-top:10px;}
+  .due-today-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    background:linear-gradient(135deg, rgba(201,162,75,0.12), rgba(47,166,160,0.08));
+    border:1px solid var(--gold); border-radius:8px; padding:18px 22px; margin:20px 0;
+  }
+  .due-today-title{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
+  .due-today-sub{font-size:12px; color:var(--text-muted); margin-top:4px; max-width:480px;}
+
+  /* ---------- roots ---------- */
+  .root-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;}
+  .root-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:20px;
+  }
+  .root-letters{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:28px; color:var(--gold-soft); direction:rtl; letter-spacing:4px;}
+  .root-meaning{font-size:12.5px; color:var(--teal-soft); margin:4px 0 14px; font-style:italic;}
+  .root-word-row{
+    display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    padding:9px 0; border-bottom:1px dashed var(--border);
+  }
+  .root-word-row:last-child{border-bottom:none;}
+  .root-word-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:19px; direction:rtl; color:var(--text);}
+  .root-word-meta{font-size:11.5px; color:var(--text-muted); text-align:right; flex-shrink:0;}
   .stat{text-align:center;}
   .stat-num{font-family:'Fraunces',serif; font-size:26px; color:var(--teal-soft); font-weight:600;}
   .stat-label{font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em;}
@@ -228,6 +251,11 @@
   .quiz-score{font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:18px;}
   .quiz-word{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:56px; color:var(--gold-soft); margin-bottom:6px; direction:rtl;}
   .quiz-translit{font-family:'Fraunces',serif; font-style:italic; color:var(--text-muted); margin-bottom:30px;}
+  .quiz-speak-btn{display:inline-flex; vertical-align:middle; margin-left:12px; width:34px; height:34px; font-size:14px;}
+  .quiz-direction-label{font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--teal-soft); margin-bottom:8px;}
+  .quiz-word-en{font-family:'Fraunces',serif; font-size:32px; font-weight:600; color:var(--text); direction:ltr; margin-bottom:30px;}
+  .quiz-opt-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:19px; direction:rtl; text-align:right;}
+  .card-speak-btn{position:absolute; top:14px; right:14px; width:32px; height:32px; font-size:13px;}
   .quiz-options{display:grid; gap:10px;}
   .quiz-opt{
     background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:14px;
@@ -544,6 +572,7 @@
     <button class="pill active" data-view="home">Categories</button>
     <button class="pill" data-view="alphabet">Alphabet</button>
     <button class="pill" data-view="conjugations">Conjugations</button>
+    <button class="pill" data-view="roots">Roots</button>
     <button class="pill" data-view="builder">Sentence Builder</button>
     <button class="pill" data-view="review">Review</button>
     <button class="pill" data-view="history">History</button>
@@ -562,6 +591,83 @@
 </footer>
 
 <script>
+/* ============================= ROOT FAMILIES DATA ============================= */
+const ROOT_FAMILIES = [
+  { root:"ك ت ب", meaning:"writing", words:[
+    {a:"كَتَبَ", t:"kataba", e:"he wrote", p:"v"}, {a:"كِتاب", t:"kitab", e:"book", p:"n"},
+    {a:"كاتِب", t:"katib", e:"writer", p:"n"}, {a:"مَكْتَب", t:"maktab", e:"office / desk", p:"n"},
+    {a:"مَكْتَبة", t:"maktaba", e:"library / bookstore", p:"n"}, {a:"مَكْتوب", t:"maktub", e:"written / destined", p:"adj"}
+  ]},
+  { root:"د ر س", meaning:"studying", words:[
+    {a:"دَرَسَ", t:"darasa", e:"he studied", p:"v"}, {a:"دِراسة", t:"dirasa", e:"study / studies", p:"n"},
+    {a:"مَدْرَسة", t:"madrasa", e:"school", p:"n"}, {a:"مُدَرِّس", t:"mudarris", e:"teacher", p:"n"},
+    {a:"دَرْس", t:"dars", e:"lesson", p:"n"}
+  ]},
+  { root:"ع ل م", meaning:"knowledge", words:[
+    {a:"عِلْم", t:"ilm", e:"knowledge / science", p:"n"}, {a:"عالَم", t:"alam", e:"world", p:"n"},
+    {a:"عالِم", t:"alim", e:"scholar", p:"n"}, {a:"مُعَلِّم", t:"mu'allim", e:"teacher", p:"n"},
+    {a:"تَعْليم", t:"ta'lim", e:"education", p:"n"}, {a:"مَعْلومة", t:"ma'luma", e:"a piece of information", p:"n"}
+  ]},
+  { root:"ع م ل", meaning:"doing / work", words:[
+    {a:"عَمِلَ", t:"amila", e:"he worked / did", p:"v"}, {a:"عَمَل", t:"amal", e:"work", p:"n"},
+    {a:"عامِل", t:"amil", e:"worker", p:"n"}, {a:"مَعْمَل", t:"ma'mal", e:"factory / lab", p:"n"},
+    {a:"عَمَلِيّة", t:"amaliyya", e:"operation / process", p:"n"}, {a:"اِسْتِعْمال", t:"isti'mal", e:"usage", p:"n"}
+  ]},
+  { root:"ق ر أ", meaning:"reading / reciting", words:[
+    {a:"قَرَأَ", t:"qara'a", e:"he read", p:"v"}, {a:"قِراءة", t:"qira'a", e:"reading", p:"n"},
+    {a:"قارِئ", t:"qari'", e:"reader", p:"n"}, {a:"قُرْآن", t:"Qur'an", e:"Quran (\"the recitation\")", p:"n"},
+    {a:"مَقْروء", t:"maqru'", e:"readable / legible", p:"adj"}
+  ]},
+  { root:"س ل م", meaning:"peace / safety / submission", words:[
+    {a:"سَلام", t:"salam", e:"peace", p:"n"}, {a:"إِسْلام", t:"Islam", e:"Islam (\"submission\")", p:"n"},
+    {a:"مُسْلِم", t:"Muslim", e:"Muslim (\"one who submits\")", p:"n"}, {a:"سَليم", t:"salim", e:"safe / sound", p:"adj"},
+    {a:"اِسْتَسْلَمَ", t:"istaslama", e:"he surrendered", p:"v"}, {a:"سُلَّم", t:"sullam", e:"ladder / stairs", p:"n"}
+  ]},
+  { root:"ح ب ب", meaning:"love", words:[
+    {a:"حُبّ", t:"hubb", e:"love", p:"n"}, {a:"حَبيب", t:"habib", e:"beloved", p:"n"},
+    {a:"مَحَبّة", t:"mahabba", e:"affection", p:"n"}, {a:"أَحَبَّ", t:"ahabba", e:"he loved", p:"v"},
+    {a:"مَحْبوب", t:"mahbub", e:"beloved / a loved one", p:"n"}
+  ]},
+  { root:"ف ه م", meaning:"understanding", words:[
+    {a:"فَهِمَ", t:"fahima", e:"he understood", p:"v"}, {a:"مَفْهوم", t:"mafhum", e:"concept / understood", p:"n"},
+    {a:"تَفاهُم", t:"tafahum", e:"mutual understanding", p:"n"}, {a:"فاهِم", t:"fahim", e:"one who understands", p:"adj"}
+  ]},
+  { root:"ج م ل", meaning:"beauty (a different, unrelated sense also gives \"camel\")", words:[
+    {a:"جَميل", t:"jamil", e:"beautiful", p:"adj"}, {a:"جَمال", t:"jamal", e:"beauty", p:"n"},
+    {a:"جُمْلة", t:"jumla", e:"sentence (\"a complete whole\")", p:"n"}, {a:"تَجْميل", t:"tajmil", e:"beautification", p:"n"},
+    {a:"جَمَل", t:"jamal", e:"camel — same letters, different root entirely!", p:"n"}
+  ]},
+  { root:"ن ظ ر", meaning:"looking / viewing", words:[
+    {a:"نَظَرَ", t:"nazara", e:"he looked", p:"v"}, {a:"نَظّارة", t:"nazzara", e:"glasses", p:"n"},
+    {a:"مَنْظَر", t:"manzar", e:"view / scene", p:"n"}, {a:"نَظَرِيّة", t:"nazariyya", e:"theory", p:"n"},
+    {a:"ناظِر", t:"nazir", e:"observer / school principal", p:"n"}
+  ]},
+  { root:"س ف ر", meaning:"travel", words:[
+    {a:"سَفَر", t:"safar", e:"travel", p:"n"}, {a:"مُسافِر", t:"musafir", e:"traveler", p:"n"},
+    {a:"سِفارة", t:"sifara", e:"embassy", p:"n"}, {a:"سَفير", t:"safir", e:"ambassador", p:"n"},
+    {a:"سافَرَ", t:"safara", e:"he traveled", p:"v"}
+  ]},
+  { root:"خ د م", meaning:"service", words:[
+    {a:"خِدْمة", t:"khidma", e:"service", p:"n"}, {a:"خادِم", t:"khadim", e:"servant / (computer) server", p:"n"},
+    {a:"مُسْتَخْدِم", t:"mustakhdim", e:"user", p:"n"}, {a:"اِسْتِخْدام", t:"istikhdam", e:"usage", p:"n"},
+    {a:"خادِمة", t:"khadima", e:"maid", p:"n"}
+  ]},
+  { root:"ع ر ف", meaning:"knowing", words:[
+    {a:"عَرَفَ", t:"arafa", e:"he knew", p:"v"}, {a:"مَعْرِفة", t:"ma'rifa", e:"knowledge", p:"n"},
+    {a:"مَعْروف", t:"ma'ruf", e:"known / well-known", p:"adj"}, {a:"تَعْريف", t:"ta'rif", e:"definition", p:"n"},
+    {a:"عارِف", t:"arif", e:"one who knows", p:"adj"}
+  ]},
+  { root:"ط ل ب", meaning:"requesting / seeking", words:[
+    {a:"طَلَبَ", t:"talaba", e:"he requested", p:"v"}, {a:"طالِب", t:"talib", e:"student (\"one who seeks\")", p:"n"},
+    {a:"مَطْلوب", t:"matlub", e:"required / wanted", p:"adj"}, {a:"طَلَبِيّة", t:"talabiyya", e:"an order (request)", p:"n"}
+  ]},
+  { root:"ص د ق", meaning:"truth / sincerity", words:[
+    {a:"صِدْق", t:"sidq", e:"truth / honesty", p:"n"}, {a:"صَديق", t:"sadiq", e:"friend", p:"n"},
+    {a:"صادِق", t:"sadiq", e:"honest / truthful", p:"adj"}, {a:"تَصْديق", t:"tasdiq", e:"verification", p:"n"},
+    {a:"صَدَقة", t:"sadaqa", e:"charity (\"an act of sincerity\")", p:"n"}
+  ]}
+];
+
 /* ============================= HELPERS FOR EXTENDED VOCAB ============================= */
 function autoSentence(w){
   const a = w.a;
@@ -1881,8 +1987,57 @@ function getProgress(id){
   return PROGRESS[id] || {status:"new", seen:0, correct:0, wrong:0, streak:0, lastSeen:null, masteredAt:null, popQuizPending:0};
 }
 
+/* ============================= DAILY STREAK ============================= */
+const STREAK_KEY = "streak-v1";
+let STREAK = { current:0, longest:0, lastActiveDate:null, totalDaysActive:0 };
+
+async function loadStreak(){
+  try{
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(STREAK_KEY, false);
+      if(res && res.value) STREAK = JSON.parse(res.value);
+    } else if(STORAGE_BACKEND === "local"){
+      const raw = localStorage.getItem(STREAK_KEY);
+      if(raw) STREAK = JSON.parse(raw);
+    } else if(_memoryStore[STREAK_KEY]){
+      STREAK = JSON.parse(_memoryStore[STREAK_KEY]);
+    }
+  }catch(e){ /* none yet */ }
+}
+let streakSaveTimer=null;
+function saveStreak(){
+  clearTimeout(streakSaveTimer);
+  streakSaveTimer = setTimeout(()=>{ saveStreakNow(); }, 350);
+}
+async function saveStreakNow(){
+  const json = JSON.stringify(STREAK);
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(STREAK_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(STREAK_KEY, json);
+    else _memoryStore[STREAK_KEY] = json;
+  }catch(e){ console.warn("Streak save failed", e); }
+}
+function todayString(offsetDays){
+  const d = new Date();
+  if(offsetDays) d.setDate(d.getDate()-offsetDays);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+let _streakUpdatedThisSession = false;
+function recordActivityToday(){
+  const today = todayString();
+  if(STREAK.lastActiveDate === today){ return; }
+  const yesterday = todayString(1);
+  STREAK.current = (STREAK.lastActiveDate === yesterday) ? (STREAK.current||0) + 1 : 1;
+  STREAK.longest = Math.max(STREAK.longest||0, STREAK.current);
+  STREAK.totalDaysActive = (STREAK.totalDaysActive||0) + 1;
+  STREAK.lastActiveDate = today;
+  _streakUpdatedThisSession = true;
+  saveStreak();
+}
+
 // Returns {demoted} — demoted=true when a mastered word was just missed and downgraded to "shaky"
 function markResult(word, correct){
+  recordActivityToday();
   const id = word.id;
   let p = PROGRESS[id] || {status:"new", seen:0, correct:0, wrong:0, streak:0, lastSeen:null, masteredAt:null, popQuizPending:0};
   p.seen++;
@@ -1911,9 +2066,33 @@ function markResult(word, correct){
       p.status = "learning";
     }
   }
+
+  // Spaced-repetition scheduling (simplified SM-2) — runs independently of the
+  // mastered/shaky status above, so it isn't affected by that system's own resets.
+  p.srsReps = correct ? (p.srsReps||0) + 1 : 0;
+  p.easeFactor = p.easeFactor || 2.5;
+  if(correct){
+    if(p.srsReps === 1) p.interval = 1;
+    else if(p.srsReps === 2) p.interval = 6;
+    else p.interval = Math.round((p.interval||6) * p.easeFactor);
+    p.easeFactor = Math.max(1.3, p.easeFactor + 0.1);
+  } else {
+    p.interval = 1;
+    p.easeFactor = Math.max(1.3, p.easeFactor - 0.2);
+  }
+  p.nextReview = Date.now() + p.interval*24*60*60*1000;
+
   PROGRESS[id] = p;
   saveProgress();
   return {demoted, progress:p};
+}
+
+function getDueWords(){
+  const now = Date.now();
+  return allWords().filter(w=>{
+    const p = PROGRESS[w.id];
+    return p && p.nextReview && p.nextReview <= now;
+  });
 }
 
 // Marks any shaky words already in the deck, and randomly injects a couple more from elsewhere
@@ -2006,11 +2185,14 @@ function renderHome(){
       <h1 class="hero-title">Learn Arabic, <em>one flash at a time</em></h1>
       <p class="hero-desc">A curated, categorized Arabic vocabulary trainer. Browse by topic, drill with flashcards, quiz yourself, and see every word used in a real sentence. Hover or long-press any Arabic word, anywhere on this site, to see its meaning.</p>
       <div class="hero-stats">
+        <div class="stat streak-stat"><div class="stat-num">🔥 ${STREAK.current||0}</div><div class="stat-label">Day streak</div></div>
         <div class="stat"><div class="stat-num">${totalWordCount()}</div><div class="stat-label">Words</div></div>
         <div class="stat"><div class="stat-num">${totalCats}</div><div class="stat-label">Categories</div></div>
         <div class="stat"><div class="stat-num">${totalSubs}</div><div class="stat-label">Subcategories</div></div>
       </div>
+      ${STREAK.longest>0 ? `<div class="streak-sub">Longest streak: ${STREAK.longest} day${STREAK.longest===1?"":"s"} · ${STREAK.totalDaysActive||0} total days practiced</div>` : ""}
     </div>
+    <div id="dueTodayWrap"></div>
     <div class="section-label">Choose a difficulty</div>
     <div class="diff-bar" id="diffBar"></div>
     <div class="diff-desc" id="diffDesc"></div>
@@ -2023,7 +2205,25 @@ function renderHome(){
   renderQuickActions();
   renderCatGrid();
   renderProgressBar();
+  renderDueToday();
   startHeroFlash();
+}
+
+function renderDueToday(){
+  const wrap = document.getElementById("dueTodayWrap");
+  if(!wrap) return;
+  const due = getDueWords();
+  if(due.length === 0){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = `
+    <div class="due-today-banner">
+      <div>
+        <div class="due-today-title">📅 ${due.length} word${due.length===1?"":"s"} due for review today</div>
+        <div class="due-today-sub">Spaced-repetition scheduling — these are timed to come back right when you're about to forget them.</div>
+      </div>
+      <button class="btn primary" id="dueTodayBtn">Review now</button>
+    </div>
+  `;
+  document.getElementById("dueTodayBtn").addEventListener("click", ()=>startFlashcardsSession(shuffle(due).slice(0,30), "Due Today"));
 }
 
 function renderProgressBar(){
@@ -2372,6 +2572,33 @@ function renderVerbDetail(idx){
   presBody.querySelectorAll(".speak-btn").forEach((btn,i)=>btn.addEventListener("click", ()=>speak(v.present[i][0])));
 }
 
+/* ============================= RENDER: ROOTS ============================= */
+function renderRoots(){
+  main.innerHTML = `
+    <div class="hero" style="padding:6px 0 18px; text-align:left;">
+      <h1 class="hero-title" style="margin-top:0;">Word <em>roots</em></h1>
+      <p class="alpha-intro">This is the idea from the Conjugations page's grammar explainer, put into practice: every word below shares three consonants with all the others in its card — the root — and each one dresses that same core meaning in a different grammatical pattern (verb, doer-of-the-action, place-where-it-happens, tool, and so on). Recognizing a root you already know is often the fastest way to guess a brand-new word's general meaning.</p>
+    </div>
+    <div class="root-grid" id="rootGrid"></div>
+  `;
+  const grid = document.getElementById("rootGrid");
+  ROOT_FAMILIES.forEach(fam=>{
+    const card = document.createElement("div");
+    card.className = "root-card";
+    card.innerHTML = `
+      <div class="root-letters">${fam.root}</div>
+      <div class="root-meaning">core idea: ${fam.meaning}</div>
+      ${fam.words.map(w=>`
+        <div class="root-word-row">
+          <span class="root-word-ar">${w.a}</span>
+          <span class="root-word-meta">${w.t} — ${w.e}</span>
+        </div>
+      `).join("")}
+    `;
+    grid.appendChild(card);
+  });
+}
+
 /* ============================= RENDER: ALPHABET ============================= */
 function renderAlphabet(){
   main.innerHTML = `
@@ -2541,6 +2768,7 @@ function renderFlashcard(){
           <div class="card-face card-front">
             <div class="card-word">${displayWord(w)}</div>
             <div class="card-pos">${w.p||''}</div>
+            <button class="speak-btn card-speak-btn" id="fcSpeakBtn" title="Listen">🔊</button>
             <div class="card-hint">Tap to reveal meaning</div>
             ${showTashkeel && !w.tk ? '<div class="card-hint" style="color:var(--danger); margin-top:2px;">⚠️ Diacritics not added yet for this word</div>' : ""}
           </div>
@@ -2560,6 +2788,7 @@ function renderFlashcard(){
   bindCrumbs();
   const cardEl = document.getElementById("fcCard");
   cardEl.addEventListener("click", ()=>cardEl.classList.toggle("flipped"));
+  document.getElementById("fcSpeakBtn").addEventListener("click", (e)=>{ e.stopPropagation(); speak(w.tk || w.a); });
   document.getElementById("fcKnowBtn").addEventListener("click", (e)=>{
     e.stopPropagation();
     markResult(w, true);
@@ -2603,6 +2832,11 @@ function buildOptions(correctWord, pool){
   const distractors = shuffle(others).slice(0,3).map(w=>w.e);
   return shuffle([correctWord.e, ...distractors]);
 }
+function buildOptionsReverse(correctWord, pool){
+  const others = pool.filter(w=>w.a!==correctWord.a);
+  const distractors = shuffle(others).slice(0,3).map(w=>displayWord(w));
+  return shuffle([displayWord(correctWord), ...distractors]);
+}
 
 function renderQuiz(){
   if(qzState.i >= qzState.deck.length){
@@ -2637,28 +2871,38 @@ function renderQuiz(){
   const pool = qzState.cat
     ? (allWordsFromWholeCategory(qzState.cat).length > 6 ? allWordsFromWholeCategory(qzState.cat) : allWords())
     : allWords();
-  const options = buildOptions(w, pool.filter(x=>x.a!==w.a).concat([w]));
+  const direction = Math.random() < 0.5 ? "ar2en" : "en2ar";
+  const correctText = direction==="ar2en" ? w.e : displayWord(w);
+  const options = direction==="ar2en"
+    ? buildOptions(w, pool.filter(x=>x.a!==w.a).concat([w]))
+    : buildOptionsReverse(w, pool.filter(x=>x.a!==w.a).concat([w]));
+  const promptHtml = direction==="ar2en"
+    ? `<div class="quiz-word">${displayWord(w)}<button class="speak-btn quiz-speak-btn" id="quizSpeakBtn" title="Listen">🔊</button></div>
+       <div class="quiz-translit">${w.t}</div>`
+    : `<div class="quiz-direction-label">Choose the Arabic word for:</div>
+       <div class="quiz-word quiz-word-en">${w.e}</div>`;
   main.innerHTML = `
     <div class="crumbs">${crumbHtml(qzState, " — Quiz")}</div>
     <div class="quiz-wrap">
       <div class="quiz-score">Question ${qzState.i+1} of ${qzState.deck.length} · Score ${qzState.score}</div>
       ${w.isPopQuiz ? '<div class="popquiz-badge">🔔 Pop quiz — you marked this mastered before</div>' : ""}
-      <div class="quiz-word">${displayWord(w)}</div>
-      <div class="quiz-translit">${w.t}</div>
+      ${promptHtml}
       <div class="quiz-options" id="quizOptions"></div>
       <div class="quiz-next" id="quizNextWrap" style="display:none;"><button class="btn primary" id="quizNext">Next →</button></div>
     </div>
   `;
   bindCrumbs();
+  const speakBtn = document.getElementById("quizSpeakBtn");
+  if(speakBtn) speakBtn.addEventListener("click", (e)=>{ e.stopPropagation(); speak(w.tk || w.a); });
   const optWrap = document.getElementById("quizOptions");
   options.forEach(optText=>{
     const btn = document.createElement("div");
-    btn.className="quiz-opt";
+    btn.className="quiz-opt" + (direction==="en2ar" ? " quiz-opt-ar" : "");
     btn.textContent = optText;
     btn.addEventListener("click", ()=>{
       if(qzState.answered) return;
       qzState.answered = true;
-      const correct = optText === w.e;
+      const correct = optText === correctText;
       if(correct) qzState.score++;
       const {demoted} = markResult(w, correct);
       if(demoted){
@@ -2668,9 +2912,18 @@ function renderQuiz(){
       }
       document.querySelectorAll(".quiz-opt").forEach(o=>{
         o.classList.add("disabled");
-        if(o.textContent === w.e) o.classList.add("correct");
+        if(o.textContent === correctText) o.classList.add("correct");
         else if(o===btn) o.classList.add("wrong");
       });
+      if(direction==="en2ar"){
+        const correctEl = optWrap.querySelector(".quiz-opt.correct");
+        if(correctEl && !correctEl.querySelector(".speak-btn")){
+          const sb = document.createElement("button");
+          sb.className = "speak-btn"; sb.style.marginLeft="8px"; sb.textContent = "🔊";
+          sb.addEventListener("click", (e)=>{ e.stopPropagation(); speak(w.tk || w.a); });
+          correctEl.appendChild(sb);
+        }
+      }
       document.getElementById("quizNextWrap").style.display="block";
     });
     optWrap.appendChild(btn);
@@ -3059,11 +3312,13 @@ function render(){
   else if(state.view==="review") renderReview();
   else if(state.view==="history") renderHistory();
   else if(state.view==="builder") startBuilder();
+  else if(state.view==="roots") renderRoots();
 }
 (async function init(){
   assignWordIds();
   buildWordsById();
   await loadProgress();
+  await loadStreak();
   render();
   // Service worker: only registers over HTTPS/localhost (browsers block it on file:// pages).
   // This is what makes offline use + "Install app" work once this is hosted somewhere.

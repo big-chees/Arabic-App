@@ -111,27 +111,6 @@
   .tashkeel-toggle.on{background:var(--teal); border-color:var(--teal); color:var(--ink); font-weight:600;}
   .tk-sample{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:16px;}
 
-  .voice-toggle{
-    background:transparent; border:1px solid var(--border); color:var(--text-muted);
-    padding:9px 16px; border-radius:999px; font-size:12.5px; cursor:pointer; font-family:'Inter',sans-serif;
-    display:inline-flex; align-items:center; gap:6px; transition:all .15s ease;
-  }
-  .voice-toggle:hover{border-color:var(--gold); color:var(--text);}
-  .voice-wrap{position:relative; flex-shrink:0;}
-  .voice-panel{
-    position:absolute; top:100%; right:0; margin-top:8px; background:var(--panel-2); border:1px solid var(--gold); border-radius:10px;
-    padding:14px; width:280px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:150; max-height:340px; overflow-y:auto;
-  }
-  .voice-option{
-    display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px; border-radius:6px;
-    cursor:pointer; font-size:12.5px; transition:background .15s ease;
-  }
-  .voice-option:hover{background:rgba(201,162,75,0.12);}
-  .voice-option.selected{background:rgba(47,166,160,0.15); color:var(--teal-soft); font-weight:600;}
-  .voice-option-test{background:none; border:1px solid var(--border); color:var(--text-muted); border-radius:5px; padding:3px 8px; font-size:11px; cursor:pointer; flex-shrink:0;}
-  .voice-option-test:hover{border-color:var(--gold); color:var(--text);}
-  .voice-panel-note{font-size:11px; color:var(--text-muted); margin-bottom:10px; line-height:1.5;}
-
   main{padding:34px 6vw 80px; max-width:1180px; margin:0 auto;}
 
   /* ---------- hero ---------- */
@@ -710,12 +689,6 @@
     <button class="pill" data-view="history">History</button>
     <button class="pill" data-view="sentences-all">Sentences</button>
   </nav>
-  <div class="voice-wrap">
-    <button class="voice-toggle" id="voiceToggle" title="Choose which voice reads Arabic aloud">
-      🔊 Voice: <span id="voiceLabel">Default</span>
-    </button>
-    <div class="voice-panel" id="voicePanel" style="display:none;"></div>
-  </div>
   <button class="tashkeel-toggle" id="tashkeelToggle" title="Show vowel marks (tashkeel) on words where available">
     <span class="tk-sample">اَبَتَ</span> Tashkeel: <span id="tkState">Off</span>
   </button>
@@ -2347,91 +2320,7 @@ function speak(text){
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ar-SA";
   utter.rate = 0.75;
-  const voice = getSelectedVoiceObject();
-  if(voice) utter.voice = voice;
   window.speechSynthesis.speak(utter);
-}
-
-/* ============================= VOICE SELECTION ============================= */
-// Available voices depend entirely on the device/browser — this just lets the
-// person pick among whatever Arabic voices their OS/browser actually has installed.
-const VOICE_KEY = "voice-v1";
-let selectedVoiceURI = null; // null = browser default
-function getArabicVoices(){
-  if(!("speechSynthesis" in window)) return [];
-  return window.speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().startsWith("ar"));
-}
-function getSelectedVoiceObject(){
-  if(!selectedVoiceURI) return null;
-  return getArabicVoices().find(v=>v.voiceURI===selectedVoiceURI) || null;
-}
-async function loadVoiceChoice(){
-  try{
-    if(STORAGE_BACKEND === "claude"){
-      const res = await window.storage.get(VOICE_KEY, false);
-      if(res && res.value) selectedVoiceURI = JSON.parse(res.value);
-    } else if(STORAGE_BACKEND === "local"){
-      const raw = localStorage.getItem(VOICE_KEY);
-      if(raw) selectedVoiceURI = JSON.parse(raw);
-    } else if(_memoryStore[VOICE_KEY]){
-      selectedVoiceURI = JSON.parse(_memoryStore[VOICE_KEY]);
-    }
-  }catch(e){ /* none yet, default to browser default */ }
-}
-async function saveVoiceChoice(){
-  const json = JSON.stringify(selectedVoiceURI);
-  try{
-    if(STORAGE_BACKEND === "claude") await window.storage.set(VOICE_KEY, json, false);
-    else if(STORAGE_BACKEND === "local") localStorage.setItem(VOICE_KEY, json);
-    else _memoryStore[VOICE_KEY] = json;
-  }catch(e){ console.warn("Voice choice save failed", e); }
-}
-function updateVoiceLabel(){
-  const label = document.getElementById("voiceLabel");
-  if(!label) return;
-  const v = getSelectedVoiceObject();
-  label.textContent = v ? v.name.split(" ").slice(0,2).join(" ") : "Default";
-}
-function renderVoicePanel(){
-  const panel = document.getElementById("voicePanel");
-  if(!panel) return;
-  const voices = getArabicVoices();
-  let html = `<div class="voice-panel-note">These are the Arabic voices your device currently has installed — this app doesn't bundle its own, it just uses your browser's built-in text-to-speech. More voices may be available in your device's accessibility/language settings.</div>`;
-  html += `<div class="voice-option${selectedVoiceURI===null?" selected":""}" data-uri="">
-    <span>🔈 Default (browser's choice)</span>
-  </div>`;
-  if(voices.length === 0){
-    html += `<div class="voice-panel-note">No additional Arabic voices detected yet — some browsers take a moment to list them, or your device may only have one.</div>`;
-  } else {
-    voices.forEach(v=>{
-      html += `<div class="voice-option${selectedVoiceURI===v.voiceURI?" selected":""}" data-uri="${v.voiceURI}">
-        <span>${v.name} (${v.lang})</span>
-        <button class="voice-option-test" data-test="${v.voiceURI}">▶ Test</button>
-      </div>`;
-    });
-  }
-  panel.innerHTML = html;
-  panel.querySelectorAll(".voice-option").forEach(opt=>{
-    opt.addEventListener("click", (e)=>{
-      if(e.target.classList.contains("voice-option-test")) return;
-      selectedVoiceURI = opt.dataset.uri || null;
-      saveVoiceChoice();
-      updateVoiceLabel();
-      renderVoicePanel();
-    });
-  });
-  panel.querySelectorAll(".voice-option-test").forEach(btn=>{
-    btn.addEventListener("click", (e)=>{
-      e.stopPropagation();
-      const v = getArabicVoices().find(x=>x.voiceURI===btn.dataset.test);
-      if(v){
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance("مرحباً، هذا مثال على هذا الصوت.");
-        utter.voice = v; utter.lang = "ar-SA"; utter.rate = 0.75;
-        window.speechSynthesis.speak(utter);
-      }
-    });
-  });
 }
 
 /* ============================= HELPERS ============================= */
@@ -2889,27 +2778,6 @@ document.getElementById("tashkeelToggle").addEventListener("click", ()=>{
   document.getElementById("brandAr").textContent = showTashkeel ? BRAND_AR_TK : BRAND_AR;
   activeRerender();
 });
-document.getElementById("voiceToggle").addEventListener("click", (e)=>{
-  e.stopPropagation();
-  const panel = document.getElementById("voicePanel");
-  const isOpen = panel.style.display !== "none";
-  if(isOpen){ panel.style.display = "none"; }
-  else { renderVoicePanel(); panel.style.display = "block"; }
-});
-document.addEventListener("click", (e)=>{
-  const panel = document.getElementById("voicePanel");
-  const toggle = document.getElementById("voiceToggle");
-  if(panel && panel.style.display !== "none" && !panel.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)){
-    panel.style.display = "none";
-  }
-});
-if("speechSynthesis" in window){
-  window.speechSynthesis.addEventListener("voiceschanged", ()=>{
-    updateVoiceLabel();
-    const panel = document.getElementById("voicePanel");
-    if(panel && panel.style.display !== "none") renderVoicePanel();
-  });
-}
 
 /* ============================= DIFFICULTY ============================= */
 let selectedDifficulty = "mixed";
@@ -4484,8 +4352,6 @@ function render(){
   buildWordsById();
   await loadProgress();
   await loadStreak();
-  await loadVoiceChoice();
-  updateVoiceLabel();
   render();
   initTimerWidget();
   // Service worker: only registers over HTTPS/localhost (browsers block it on file:// pages).

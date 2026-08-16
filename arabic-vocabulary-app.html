@@ -184,6 +184,8 @@
   .sub-card .name-ar{font-family:'Noto Naskh Arabic','Amiri',serif; color:var(--gold-soft); font-size:16px; margin-left:6px;}
   .sub-card .count{font-size:12px; color:var(--text-muted); margin:6px 0 14px;}
   .sub-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .sub-actions-games{margin-top:8px;}
+  .sub-actions-games .btn{font-size:11px; padding:8px 12px;}
   .know-all-btn{
     display:block; width:100%; margin-top:8px; background:transparent; border:1px dashed var(--border);
     color:var(--text-muted); padding:8px; border-radius:5px; font-size:11.5px; cursor:pointer; transition:all .15s ease;
@@ -202,6 +204,8 @@
   }
   .btn:hover{border-color:var(--teal); color:var(--teal-soft);}
   .btn.primary{background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:600;}
+  .btn.gold{background:transparent; border-color:var(--gold); color:var(--gold-soft); font-weight:600;}
+  .btn.gold:hover{background:var(--gold); color:var(--ink);}
   .btn.primary:hover{background:var(--gold-soft); color:var(--ink);}
   .btn.teal{border-color:var(--teal); color:var(--teal-soft);}
 
@@ -359,6 +363,38 @@
     background:var(--panel); border:1px solid var(--border); border-radius:10px;
     padding:36px 28px; max-width:640px; margin:0 auto; text-align:center;
   }
+
+  /* ---------- matching game ---------- */
+  .match-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;
+  }
+  .match-tile{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:18px 10px; min-height:64px; cursor:pointer; font-size:14px; color:var(--text);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    transition:all .15s ease; line-height:1.4;
+  }
+  .match-tile-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:19px; direction:rtl;}
+  .match-tile:hover{border-color:var(--teal);}
+  .match-tile.selected{border-color:var(--gold); background:rgba(201,162,75,0.15); color:var(--gold-soft);}
+  .match-tile.wrong{border-color:var(--danger); background:rgba(193,85,74,0.18); color:var(--danger); animation:matchShake .3s;}
+  @keyframes matchShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+  @media (max-width:640px){
+    .match-grid{grid-template-columns:repeat(2, 1fr);}
+  }
+
+  /* ---------- mosaic rush ---------- */
+  .mosaic-grid{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;}
+  .mosaic-tile{
+    aspect-ratio:1; border-radius:4px; border:1px solid var(--border); background:var(--panel);
+    transition:all .3s ease;
+  }
+  .mosaic-tile.filled{
+    background:linear-gradient(135deg, var(--gold), var(--teal));
+    border-color:var(--gold);
+    box-shadow:0 0 8px rgba(201,162,75,0.5);
+  }
+
   .sentence-toggle{
     margin-top:10px; font-size:12px; color:var(--teal-soft); cursor:pointer; letter-spacing:0.04em;
     display:inline-block; border-bottom:1px dotted var(--teal-soft);
@@ -2316,11 +2352,20 @@ function speak(text){
     alert("Your browser doesn't support text-to-speech. Try Chrome, Edge, or Safari.");
     return;
   }
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "ar-SA";
-  utter.rate = 0.75;
-  window.speechSynthesis.speak(utter);
+  // iOS Safari (particularly iPhone) has a known bug: calling cancel() and speak()
+  // back-to-back in the same tick can silently drop the utterance — cancel() takes
+  // a moment to actually clear the queue. iPadOS tends to tolerate this; iPhone often
+  // doesn't. A short delay after cancel() and a resume() call are the standard fix.
+  window.speechSynthesis.resume();
+  if(window.speechSynthesis.speaking || window.speechSynthesis.pending){
+    window.speechSynthesis.cancel();
+  }
+  setTimeout(()=>{
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ar-SA";
+    utter.rate = 0.75;
+    window.speechSynthesis.speak(utter);
+  }, 60);
 }
 
 /* ============================= HELPERS ============================= */
@@ -3417,6 +3462,11 @@ function renderCategory(catId){
         <button class="btn teal" data-act="quiz">Quiz</button>
         <button class="btn" data-act="sentences">Sentences</button>
       </div>
+      <div class="sub-actions sub-actions-games">
+        <button class="btn gold" data-act="match">🎮 Match</button>
+        <button class="btn gold" data-act="tashkeel">📍 Tashkeel Challenge</button>
+        <button class="btn gold" data-act="mosaic">🕌 Mosaic Rush</button>
+      </div>
       <button class="know-all-btn" data-act="knowall">⭐ I already know these words</button>
       <div class="word-preview"></div>
     `;
@@ -3424,6 +3474,9 @@ function renderCategory(catId){
     sub.words.slice(0,6).forEach(w=>{ preview.innerHTML += wordTip(w); });
     card.querySelector('[data-act="flash"]').addEventListener("click", ()=>{ startFlashcards(cat.id, sub.id); });
     card.querySelector('[data-act="quiz"]').addEventListener("click", ()=>{ startQuiz(cat.id, sub.id); });
+    card.querySelector('[data-act="match"]').addEventListener("click", ()=>{ startMatchingGame(sub.words, sub.en, cat.id, sub.id); });
+    card.querySelector('[data-act="tashkeel"]').addEventListener("click", ()=>{ startTashkeelChallenge(sub.words, sub.en, cat.id, sub.id); });
+    card.querySelector('[data-act="mosaic"]').addEventListener("click", ()=>{ startMosaicRush(sub.words, sub.en, cat.id, sub.id); });
     card.querySelector('[data-act="sentences"]').addEventListener("click", ()=>{ renderSentences(cat.id, sub.id); });
     card.querySelector('[data-act="knowall"]').addEventListener("click", ()=>{ markSubcategoryAsKnown(sub); });
     grid.appendChild(card);
@@ -3436,11 +3489,13 @@ let fcState = {};
 function startFlashcards(catId, subId){
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
-  fcState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, known:0, history:[], flipped:false };
+  const deck = annotateAndInjectPopQuizzes(shuffle(sub.words));
+  fcState = { cat, sub, label: sub.en, sourceWords: sub.words, deck, total: deck.length, i:0, known:0, history:[], flipped:false };
   renderFlashcard();
 }
 function startFlashcardsSession(words, label){
-  fcState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, known:0, history:[], flipped:false };
+  const deck = annotateAndInjectPopQuizzes(shuffle(words));
+  fcState = { cat:null, sub:null, label, sourceWords: words, deck, total: deck.length, i:0, known:0, history:[], flipped:false };
   renderFlashcard();
 }
 
@@ -3507,13 +3562,17 @@ function renderFlashcard(){
     return;
   }
   const w = fcState.deck[fcState.i];
-  const pct = Math.round((fcState.i/fcState.deck.length)*100);
+  const total = fcState.total || fcState.deck.length;
+  const pct = Math.min(100, Math.round((fcState.i/total)*100));
+  const cardLabel = (fcState.i+1) <= total
+    ? `Card ${fcState.i+1} of ${total}`
+    : `Reviewing missed words (${fcState.deck.length - fcState.i} left)`;
   main.innerHTML = `
     <div class="crumbs">${crumbHtml(fcState, " — Flashcards")}</div>
     <div class="fc-wrap">
       <div class="fc-progress"><div class="fc-progress-bar" style="width:${pct}%"></div></div>
       <div class="practice-top-row">
-        <div class="fc-meta">Card ${fcState.i+1} of ${fcState.deck.length}</div>
+        <div class="fc-meta">${cardLabel}</div>
         <button class="exit-btn" id="fcExitBtn" title="Exit to subcategories">✕ Exit</button>
       </div>
       ${w.isPopQuiz ? '<div class="popquiz-badge">🔔 Pop quiz — you marked this mastered before</div>' : ""}
@@ -3589,14 +3648,40 @@ function bindCrumbs(){
 /* ============================= QUIZ ============================= */
 let qzState = {};
 
+/* ============================= QUIZ STOPWATCH ============================= */
+// A simple elapsed-time display shown during any quiz session (word quiz, sentence
+// quiz). Purely informational — doesn't affect scoring, just gives a sense of pace.
+let quizTimerInterval = null;
+let quizTimerStart = null;
+function startQuizStopwatch(){
+  stopQuizStopwatch();
+  quizTimerStart = Date.now();
+  quizTimerInterval = setInterval(updateQuizStopwatchDisplay, 1000);
+  updateQuizStopwatchDisplay();
+}
+function stopQuizStopwatch(){
+  clearInterval(quizTimerInterval);
+  quizTimerInterval = null;
+}
+function updateQuizStopwatchDisplay(){
+  const el = document.getElementById("quizStopwatch");
+  if(!el){ return; } // element just isn't on screen right now (e.g. done screen) — keep ticking, don't stop
+  const elapsed = Math.floor((Date.now()-quizTimerStart)/1000);
+  const m = Math.floor(elapsed/60);
+  const s = elapsed%60;
+  el.textContent = `⏱️ ${m}:${String(s).padStart(2,"0")}`;
+}
+
 function startQuiz(catId, subId){
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
   qzState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
+  startQuizStopwatch();
   renderQuiz();
 }
 function startQuizSession(words, label){
   qzState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
+  startQuizStopwatch();
   renderQuiz();
 }
 
@@ -3634,11 +3719,15 @@ function undoLastQzAnswer(){
 function renderQuiz(){
   activeRerender = renderQuiz;
   if(qzState.i >= qzState.deck.length){
+    stopQuizStopwatch();
+    const finalElapsed = quizTimerStart ? Math.floor((Date.now()-quizTimerStart)/1000) : 0;
+    const fm = Math.floor(finalElapsed/60), fs = finalElapsed%60;
     main.innerHTML = `
       <div class="crumbs">${crumbHtml(qzState)}</div>
       <div class="fc-done">
         <div style="font-size:44px;">🏁</div>
         <div class="big">Score: ${qzState.score} / ${qzState.deck.length}</div>
+        <p style="color:var(--text-muted);">⏱️ Finished in ${fm}:${String(fs).padStart(2,"0")}</p>
         <div class="fc-controls" style="margin-top:20px;">
           ${qzState.history.length>0 ? '<button class="btn back-btn" id="qzBackOne">← Back to last question</button>' : ""}
           <button class="btn primary" id="qzAgain">Try again</button>
@@ -3649,7 +3738,7 @@ function renderQuiz(){
     `;
     bindCrumbs();
     const backOne = document.getElementById("qzBackOne");
-    if(backOne) backOne.addEventListener("click", ()=>{ undoLastQzAnswer(); renderQuiz(); });
+    if(backOne) backOne.addEventListener("click", ()=>{ undoLastQzAnswer(); startQuizStopwatch(); renderQuiz(); });
     document.getElementById("qzAgain").addEventListener("click", ()=>{
       if(qzState.cat) startQuiz(qzState.cat.id, qzState.sub.id);
       else startQuizSession(qzState.sourceWords, qzState.label);
@@ -3692,7 +3781,7 @@ function renderQuiz(){
     <div class="crumbs">${crumbHtml(qzState, " — Quiz")}</div>
     <div class="quiz-wrap">
       <div class="quiz-top-row">
-        <div class="quiz-score">Question ${qzState.i+1} of ${qzState.deck.length} · Score ${qzState.score}</div>
+        <div class="quiz-score">Question ${qzState.i+1} of ${qzState.deck.length} · Score ${qzState.score} · <span id="quizStopwatch">⏱️ 0:00</span></div>
         <div class="quiz-top-actions">
           ${qzState.history.length>0 ? '<button class="btn back-btn quiz-back-btn" id="qzBackBtn">← Back</button>' : ""}
           <button class="exit-btn" id="qzExitBtn" title="Exit to subcategories">✕ Exit</button>
@@ -3705,9 +3794,11 @@ function renderQuiz(){
     </div>
   `;
   bindCrumbs();
+  updateQuizStopwatchDisplay();
   const qzBackBtn = document.getElementById("qzBackBtn");
   if(qzBackBtn) qzBackBtn.addEventListener("click", ()=>{ if(undoLastQzAnswer()) renderQuiz(); });
   document.getElementById("qzExitBtn").addEventListener("click", ()=>{
+    stopQuizStopwatch();
     if(qzState.cat) renderCategory(qzState.cat.id);
     else setView("home");
   });
@@ -3872,6 +3963,7 @@ function renderSentencePractice(){
 let sqState = {};
 function startSentenceQuiz(words, label, catId, subId){
   sqState = { pool: words, label, catId, subId, score:0, asked:0, current:null, options:null, answered:false };
+  startQuizStopwatch();
   nextSentenceQuizQuestion();
 }
 function nextSentenceQuizQuestion(){
@@ -3890,7 +3982,7 @@ function renderSentenceQuiz(){
     <div class="crumbs">${sqState.catId ? crumbHtmlForSentences(sqState) : '<a data-nav="sent-hub">Sentences</a> <span>›</span> <span>Meaning Quiz</span>'}</div>
     <div class="quiz-wrap">
       <div class="quiz-top-row">
-        <div class="quiz-score">🎯 ${sqState.label} · Question ${sqState.asked} · Score ${sqState.score}</div>
+        <div class="quiz-score">🎯 ${sqState.label} · Question ${sqState.asked} · Score ${sqState.score} · <span id="quizStopwatch">⏱️ 0:00</span></div>
         <button class="exit-btn" id="sqExitBtn" title="Exit">✕ Exit</button>
       </div>
       <div class="sentence-ar sentence-ar-centered" style="margin-bottom:6px;">${highlightSentence(w)}<button class="speak-btn" id="sqSpeakBtn" title="Listen">🔊</button></div>
@@ -3900,10 +3992,12 @@ function renderSentenceQuiz(){
     </div>
   `;
   bindCrumbs();
+  updateQuizStopwatchDisplay();
   const homeCrumb = main.querySelector('[data-nav="sent-hub"]');
   if(homeCrumb) homeCrumb.addEventListener("click", renderSentencesHub);
   document.getElementById("sqSpeakBtn").addEventListener("click", ()=>speak(w.s));
   document.getElementById("sqExitBtn").addEventListener("click", ()=>{
+    stopQuizStopwatch();
     if(sqState.catId) renderCategory(sqState.catId);
     else renderSentencesHub();
   });
@@ -3935,6 +4029,317 @@ function crumbHtmlForSentences(s){
     return `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — ${s.label}</span>`;
   }
   return `<a data-nav="home">Categories</a> <span>›</span> <span>${cat.en} — ${s.label}</span>`;
+}
+
+/* ============================= MATCHING GAME ============================= */
+let mgState = {};
+let matchTimerInterval = null;
+const MATCH_PAIR_COUNT = 8;
+
+function startMatchingGame(words, label, catId, subId){
+  const pairCount = Math.min(MATCH_PAIR_COUNT, words.length);
+  const chosen = shuffle(words).slice(0, pairCount);
+  const tiles = [];
+  chosen.forEach(w=>{
+    tiles.push({ id: w.id, side:"ar", text: displayWord(w) });
+    tiles.push({ id: w.id, side:"en", text: w.e });
+  });
+  mgState = {
+    sourceWords: words, words: chosen, tiles: shuffle(tiles), label, catId, subId,
+    selected: [], matchedIds: new Set(), wrongFlashIds: new Set(),
+    startTime: Date.now(), elapsed: 0, done: false, mistakes: 0
+  };
+  startMatchStopwatch();
+  renderMatchingGame();
+}
+function startMatchStopwatch(){
+  clearInterval(matchTimerInterval);
+  matchTimerInterval = setInterval(()=>{
+    const el = document.getElementById("matchStopwatch");
+    if(el && !mgState.done){
+      const s = Math.floor((Date.now()-mgState.startTime)/1000);
+      el.textContent = `⏱️ ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+    }
+  }, 1000);
+}
+function stopMatchStopwatch(){ clearInterval(matchTimerInterval); }
+function crumbHtmlForMatch(s){
+  if(!s.catId) return `<a data-nav="home">Categories</a> <span>›</span> <span>Match — ${s.label}</span>`;
+  const cat = DATA.categories.find(c=>c.id===s.catId);
+  const sub = cat.subs.find(x=>x.id===s.subId);
+  return `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Match</span>`;
+}
+function renderMatchingGame(){
+  activeRerender = renderMatchingGame;
+  main.innerHTML = `
+    <div class="crumbs">${crumbHtmlForMatch(mgState)}</div>
+    <div class="quiz-wrap" style="max-width:760px;">
+      <div class="quiz-top-row">
+        <div class="quiz-score">🎮 ${mgState.label} · <span id="matchStopwatch">⏱️ 0:00</span> · Mistakes: ${mgState.mistakes}</div>
+        <button class="exit-btn" id="mgExitBtn">✕ Exit</button>
+      </div>
+      ${mgState.done ? `
+        <div class="fc-done">
+          <div style="font-size:44px;">🎉</div>
+          <div class="big">All matched!</div>
+          <p style="color:var(--text-muted);">⏱️ ${Math.floor(mgState.elapsed/60)}:${String(mgState.elapsed%60).padStart(2,"0")} · ${mgState.mistakes} mistake${mgState.mistakes===1?"":"s"}</p>
+          <div class="fc-controls" style="margin-top:20px;">
+            <button class="btn primary" id="mgAgain">Play again</button>
+            <button class="btn" id="mgBack">${mgState.catId ? "Back to subcategories" : "Back to categories"}</button>
+          </div>
+        </div>
+      ` : `
+        <p class="alpha-intro" style="margin-bottom:16px;">Tap a word, then tap its match. Get through the board as fast as you can with the fewest mistakes.</p>
+        <div class="match-grid" id="matchGrid"></div>
+      `}
+    </div>
+  `;
+  bindCrumbs();
+  document.getElementById("mgExitBtn").addEventListener("click", ()=>{
+    stopMatchStopwatch();
+    if(mgState.catId) renderCategory(mgState.catId);
+    else setView("home");
+  });
+  if(mgState.done){
+    document.getElementById("mgAgain").addEventListener("click", ()=>startMatchingGame(mgState.sourceWords, mgState.label, mgState.catId, mgState.subId));
+    document.getElementById("mgBack").addEventListener("click", ()=>{
+      if(mgState.catId) renderCategory(mgState.catId);
+      else setView("home");
+    });
+    return;
+  }
+  const grid = document.getElementById("matchGrid");
+  mgState.tiles.forEach((tile, idx)=>{
+    if(mgState.matchedIds.has(tile.id)) return;
+    const btn = document.createElement("button");
+    btn.className = "match-tile"
+      + (tile.side==="ar" ? " match-tile-ar" : "")
+      + (mgState.wrongFlashIds.has(idx) ? " wrong" : "")
+      + (mgState.selected.includes(idx) ? " selected" : "");
+    btn.textContent = tile.text;
+    btn.addEventListener("click", ()=>handleMatchTileClick(idx));
+    grid.appendChild(btn);
+  });
+}
+function handleMatchTileClick(idx){
+  if(mgState.selected.includes(idx) || mgState.selected.length >= 2) return;
+  mgState.selected.push(idx);
+  if(mgState.selected.length < 2){ renderMatchingGame(); return; }
+  const [i1, i2] = mgState.selected;
+  const t1 = mgState.tiles[i1], t2 = mgState.tiles[i2];
+  if(t1.id === t2.id && t1.side !== t2.side){
+    mgState.matchedIds.add(t1.id);
+    mgState.selected = [];
+    if(mgState.matchedIds.size === mgState.words.length){
+      mgState.done = true;
+      mgState.elapsed = Math.floor((Date.now()-mgState.startTime)/1000);
+      stopMatchStopwatch();
+    }
+    renderMatchingGame();
+  } else {
+    mgState.mistakes++;
+    mgState.wrongFlashIds = new Set([i1, i2]);
+    renderMatchingGame();
+    setTimeout(()=>{
+      mgState.selected = [];
+      mgState.wrongFlashIds = new Set();
+      renderMatchingGame();
+    }, 700);
+  }
+}
+
+/* ============================= TASHKEEL CHALLENGE ============================= */
+// Unique to this app: undiacritized Arabic is what learners actually encounter in the
+// real world — this drills the specific skill of supplying the right vowel pattern.
+let tcState = {};
+function startTashkeelChallenge(words, label, catId, subId){
+  const pool = words.filter(w=>w.tk);
+  if(pool.length < 4){
+    showToast("Not enough tashkeel-marked words in this set yet for a challenge round.");
+    return;
+  }
+  tcState = { pool, label, catId, subId, score:0, asked:0, current:null, options:null, answered:false };
+  startQuizStopwatch();
+  nextTashkeelQuestion();
+}
+function nextTashkeelQuestion(){
+  tcState.current = tcState.pool[Math.floor(Math.random()*tcState.pool.length)];
+  const others = tcState.pool.filter(w=>w.tk !== tcState.current.tk);
+  const distractors = shuffle(others).slice(0,3).map(w=>w.tk);
+  tcState.options = shuffle([tcState.current.tk, ...distractors]);
+  tcState.answered = false;
+  tcState.asked++;
+  renderTashkeelChallenge();
+}
+function crumbHtmlForTashkeel(s){
+  if(!s.catId) return `<a data-nav="home">Categories</a> <span>›</span> <span>Tashkeel Challenge — ${s.label}</span>`;
+  const cat = DATA.categories.find(c=>c.id===s.catId);
+  const sub = cat.subs.find(x=>x.id===s.subId);
+  return `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Tashkeel Challenge</span>`;
+}
+function renderTashkeelChallenge(){
+  activeRerender = renderTashkeelChallenge;
+  const w = tcState.current;
+  main.innerHTML = `
+    <div class="crumbs">${crumbHtmlForTashkeel(tcState)}</div>
+    <div class="quiz-wrap">
+      <div class="quiz-top-row">
+        <div class="quiz-score">📍 ${tcState.label} · Question ${tcState.asked} · Score ${tcState.score} · <span id="quizStopwatch">⏱️ 0:00</span></div>
+        <button class="exit-btn" id="tcExitBtn">✕ Exit</button>
+      </div>
+      <p class="alpha-intro" style="text-align:center; margin-bottom:6px;">Real Arabic text almost never shows vowel marks — this is the skill of supplying them yourself.</p>
+      <div class="quiz-word" style="margin-bottom:2px;">${w.a}<button class="speak-btn quiz-speak-btn" id="tcSpeakBtn" title="Listen">🔊</button></div>
+      <div class="quiz-translit">${w.t} — ${w.e}</div>
+      <div class="quiz-direction-label" style="text-align:center;">Which is correctly vowelled?</div>
+      <div class="quiz-options" id="tcOptions"></div>
+      <div class="quiz-next" id="tcNextWrap" style="display:none; text-align:center;"><button class="btn primary" id="tcNext">Next →</button></div>
+    </div>
+  `;
+  bindCrumbs();
+  updateQuizStopwatchDisplay();
+  document.getElementById("tcSpeakBtn").addEventListener("click", ()=>speak(w.tk));
+  document.getElementById("tcExitBtn").addEventListener("click", ()=>{
+    stopQuizStopwatch();
+    if(tcState.catId) renderCategory(tcState.catId);
+    else setView("home");
+  });
+  const optWrap = document.getElementById("tcOptions");
+  tcState.options.forEach(optText=>{
+    const btn = document.createElement("div");
+    btn.className = "quiz-opt quiz-opt-ar";
+    btn.textContent = optText;
+    btn.addEventListener("click", ()=>{
+      if(tcState.answered) return;
+      tcState.answered = true;
+      const correct = optText === w.tk;
+      if(correct) tcState.score++;
+      document.querySelectorAll("#tcOptions .quiz-opt").forEach(o=>{
+        o.classList.add("disabled");
+        if(o.textContent === w.tk) o.classList.add("correct");
+        else if(o.textContent === optText) o.classList.add("wrong");
+      });
+      document.getElementById("tcNextWrap").style.display="block";
+    });
+    optWrap.appendChild(btn);
+  });
+  document.getElementById("tcNext").addEventListener("click", nextTashkeelQuestion);
+}
+
+/* ============================= MOSAIC RUSH ============================= */
+// A speed round themed around the zellige tilework pattern already used as this app's
+// visual identity — each correct answer completes one tile of a growing mosaic before
+// the 60-second clock (or three cracked tiles) ends the round.
+let mrState = {};
+let mrTimerInterval = null;
+const MOSAIC_SIZE = 20; // tiles to complete
+const MOSAIC_TIME = 60; // seconds
+
+function startMosaicRush(words, label, catId, subId){
+  mrState = {
+    pool: words, label, catId, subId, score:0, lives:3, timeLeft:MOSAIC_TIME,
+    current:null, options:null, answered:false, done:false, tilesFilled:0
+  };
+  clearInterval(mrTimerInterval);
+  mrTimerInterval = setInterval(()=>{
+    if(mrState.done) return;
+    mrState.timeLeft--;
+    if(mrState.timeLeft <= 0){ endMosaicRush(); return; }
+    const el = document.getElementById("mrTimeLeft");
+    if(el) el.textContent = mrState.timeLeft;
+  }, 1000);
+  nextMosaicQuestion();
+}
+function nextMosaicQuestion(){
+  if(mrState.done) return;
+  mrState.current = mrState.pool[Math.floor(Math.random()*mrState.pool.length)];
+  const others = mrState.pool.filter(w=>w.a !== mrState.current.a);
+  const distractors = shuffle(others).slice(0,3).map(w=>displayWord(w));
+  mrState.options = shuffle([displayWord(mrState.current), ...distractors]);
+  mrState.answered = false;
+  renderMosaicRush();
+}
+function endMosaicRush(){
+  mrState.done = true;
+  clearInterval(mrTimerInterval);
+  renderMosaicRush();
+}
+function crumbHtmlForMosaic(s){
+  if(!s.catId) return `<a data-nav="home">Categories</a> <span>›</span> <span>Mosaic Rush — ${s.label}</span>`;
+  const cat = DATA.categories.find(c=>c.id===s.catId);
+  const sub = cat.subs.find(x=>x.id===s.subId);
+  return `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Mosaic Rush</span>`;
+}
+function renderMosaicRush(){
+  activeRerender = renderMosaicRush;
+  const tilesHtml = Array.from({length: MOSAIC_SIZE}).map((_,i)=>
+    `<div class="mosaic-tile${i < mrState.tilesFilled ? " filled" : ""}"></div>`
+  ).join("");
+  if(mrState.done){
+    main.innerHTML = `
+      <div class="crumbs">${crumbHtmlForMosaic(mrState)}</div>
+      <div class="quiz-wrap">
+        <div class="fc-done">
+          <div style="font-size:44px;">${mrState.tilesFilled>=MOSAIC_SIZE ? "🏆" : "⏱️"}</div>
+          <div class="big">${mrState.tilesFilled>=MOSAIC_SIZE ? "Mosaic complete!" : "Time's up!"}</div>
+          <p style="color:var(--text-muted);">${mrState.score} correct · ${mrState.tilesFilled}/${MOSAIC_SIZE} tiles placed</p>
+          <div class="mosaic-grid" style="margin:20px auto; max-width:280px;">${tilesHtml}</div>
+          <div class="fc-controls" style="margin-top:12px;">
+            <button class="btn primary" id="mrAgain">Play again</button>
+            <button class="btn" id="mrBack">${mrState.catId ? "Back to subcategories" : "Back to categories"}</button>
+          </div>
+        </div>
+      </div>
+    `;
+    bindCrumbs();
+    document.getElementById("mrAgain").addEventListener("click", ()=>startMosaicRush(mrState.pool, mrState.label, mrState.catId, mrState.subId));
+    document.getElementById("mrBack").addEventListener("click", ()=>{
+      if(mrState.catId) renderCategory(mrState.catId);
+      else setView("home");
+    });
+    return;
+  }
+  const w = mrState.current;
+  main.innerHTML = `
+    <div class="crumbs">${crumbHtmlForMosaic(mrState)}</div>
+    <div class="quiz-wrap">
+      <div class="quiz-top-row">
+        <div class="quiz-score">🕌 ${mrState.label} · Score ${mrState.score} · Lives ${"❤️".repeat(mrState.lives)} · ⏳ <span id="mrTimeLeft">${mrState.timeLeft}</span>s</div>
+        <button class="exit-btn" id="mrExitBtn">✕ Exit</button>
+      </div>
+      <div class="mosaic-grid" id="mosaicGrid" style="margin:0 auto 22px; max-width:280px;">${tilesHtml}</div>
+      <div class="quiz-direction-label" style="text-align:center;">Choose the Arabic word for:</div>
+      <div class="quiz-word quiz-word-en" style="margin-bottom:14px;">${w.e}</div>
+      <div class="quiz-options" id="mrOptions"></div>
+    </div>
+  `;
+  bindCrumbs();
+  document.getElementById("mrExitBtn").addEventListener("click", ()=>{
+    clearInterval(mrTimerInterval);
+    if(mrState.catId) renderCategory(mrState.catId);
+    else setView("home");
+  });
+  const optWrap = document.getElementById("mrOptions");
+  const correctText = displayWord(w);
+  mrState.options.forEach(optText=>{
+    const btn = document.createElement("div");
+    btn.className = "quiz-opt quiz-opt-ar";
+    btn.textContent = optText;
+    btn.addEventListener("click", ()=>{
+      if(mrState.answered || mrState.done) return;
+      mrState.answered = true;
+      const correct = optText === correctText;
+      if(correct){
+        mrState.score++;
+        mrState.tilesFilled = Math.min(MOSAIC_SIZE, mrState.tilesFilled+1);
+        if(mrState.tilesFilled >= MOSAIC_SIZE){ endMosaicRush(); return; }
+      } else {
+        mrState.lives--;
+        if(mrState.lives <= 0){ endMosaicRush(); return; }
+      }
+      setTimeout(nextMosaicQuestion, correct ? 250 : 500);
+    });
+    optWrap.appendChild(btn);
+  });
 }
 
 /* ============================= RENDER: SENTENCES LIST (per subcategory or all) ============================= */

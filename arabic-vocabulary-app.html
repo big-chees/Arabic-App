@@ -355,7 +355,8 @@
     background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px;
     display:flex; flex-direction:column; gap:8px;
   }
-  .letter-top{display:flex; align-items:center; justify-content:space-between;}
+  .letter-top{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .letter-speak-btn{flex-shrink:0;}
   .letter-big{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:44px; color:var(--gold-soft); direction:rtl;}
   .letter-names{text-align:right;}
   .letter-name-ar{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:15px; color:var(--text);}
@@ -3219,6 +3220,7 @@ function renderAlphabet(){
           <div class="letter-name-ar">${L.name_ar}</div>
           <div class="letter-name-en">${L.name_en} — "${L.t}"</div>
         </div>
+        <button class="speak-btn letter-speak-btn" title="Hear the letter's name" data-letter="${L.name_ar}">🔊</button>
       </div>
       <div class="letter-forms">
         <div class="letter-form"><div class="glyph">${L.a}</div><div class="lbl">Isolated</div></div>
@@ -3235,7 +3237,8 @@ function renderAlphabet(){
         <button class="speak-btn" title="Listen" data-word="${L.ex.w}">🔊</button>
       </div>
     `;
-    card.querySelector(".speak-btn").addEventListener("click", ()=>speak(L.ex.w));
+    card.querySelector(".letter-speak-btn").addEventListener("click", ()=>speak(L.name_ar));
+    card.querySelector(".speak-btn:not(.letter-speak-btn)").addEventListener("click", ()=>speak(L.ex.w));
     grid.appendChild(card);
   });
   const hgrid = document.getElementById("harakatGrid");

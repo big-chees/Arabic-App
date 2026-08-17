@@ -4226,6 +4226,52 @@ function handleMatchTileClick(idx){
 // Unique to this app: undiacritized Arabic is what learners actually encounter in the
 // real world — this drills the specific skill of supplying the right vowel pattern.
 let tcState = {};
+// Splits a tashkeel-marked string into {base, marks} pairs, one per Arabic letter,
+// so we can identify and scramble just the short-vowel positions.
+function tokenizeTashkeel(tk){
+  const tokens = [];
+  const chars = Array.from(tk);
+  let i = 0;
+  while(i < chars.length){
+    const base = chars[i];
+    i++;
+    let marks = "";
+    while(i < chars.length && /[\u064B-\u0652\u0670]/.test(chars[i])){
+      marks += chars[i];
+      i++;
+    }
+    tokens.push({base, marks});
+  }
+  return tokens;
+}
+const SHORT_VOWEL_MARKS = ["\u064E","\u0650","\u064F","\u0652"]; // fatha, kasra, damma, sukun
+// Produces a plausible-looking WRONG vowelization of the same word — same letters,
+// same positions, just the wrong short vowel at one or more spots. Shadda/tanwin/long
+// vowels are left untouched so the result never looks broken, just incorrectly vowelled.
+function generateWrongTashkeelVariant(tk){
+  const tokens = tokenizeTashkeel(tk);
+  const swappable = [];
+  tokens.forEach((tok, idx)=>{ if(SHORT_VOWEL_MARKS.includes(tok.marks)) swappable.push(idx); });
+  if(swappable.length === 0) return null;
+  const result = tokens.map(t=>({...t}));
+  swappable.forEach(idx=>{
+    const current = result[idx].marks;
+    const choices = SHORT_VOWEL_MARKS.filter(v=>v!==current);
+    result[idx].marks = choices[Math.floor(Math.random()*choices.length)];
+  });
+  return result.map(t=>t.base+t.marks).join("");
+}
+function generateWrongTashkeelOptions(tk, count){
+  const variants = new Set();
+  let attempts = 0;
+  while(variants.size < count && attempts < 40){
+    attempts++;
+    const v = generateWrongTashkeelVariant(tk);
+    if(v && v !== tk) variants.add(v);
+  }
+  return Array.from(variants);
+}
+
 function startTashkeelChallenge(words, label, catId, subId){
   const pool = words.filter(w=>w.tk);
   if(pool.length < 4){
@@ -4238,9 +4284,15 @@ function startTashkeelChallenge(words, label, catId, subId){
 }
 function nextTashkeelQuestion(){
   tcState.current = tcState.pool[Math.floor(Math.random()*tcState.pool.length)];
-  const others = tcState.pool.filter(w=>w.tk !== tcState.current.tk);
-  const distractors = shuffle(others).slice(0,3).map(w=>w.tk);
-  tcState.options = shuffle([tcState.current.tk, ...distractors]);
+  let wrongVariants = generateWrongTashkeelOptions(tcState.current.tk, 3);
+  // Fallback for the rare word too short to scramble (e.g. only one swappable vowel) —
+  // pad out with other real words' correct forms so the question never breaks.
+  if(wrongVariants.length < 3){
+    const others = tcState.pool.filter(w=>w.tk !== tcState.current.tk && !wrongVariants.includes(w.tk));
+    const padding = shuffle(others).slice(0, 3-wrongVariants.length).map(w=>w.tk);
+    wrongVariants = wrongVariants.concat(padding);
+  }
+  tcState.options = shuffle([tcState.current.tk, ...wrongVariants]);
   tcState.answered = false;
   tcState.asked++;
   renderTashkeelChallenge();

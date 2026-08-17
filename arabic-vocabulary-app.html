@@ -292,7 +292,7 @@
   @keyframes timerPulse{0%,100%{box-shadow:0 4px 18px rgba(47,166,160,0.45);}50%{box-shadow:0 4px 26px rgba(47,166,160,0.85);}}
   @keyframes timerShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
   .timer-panel{
-    background:var(--panel-2); border:1px solid var(--gold); border-radius:12px; padding:20px; width:230px;
+    background:var(--panel-2); border:1px solid var(--gold); border-radius:12px; padding:20px; width:260px;
     box-shadow:0 10px 36px rgba(0,0,0,0.55);
   }
   .timer-panel-title{font-family:'Fraunces',serif; font-weight:600; font-size:14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
@@ -304,12 +304,15 @@
     padding:7px 4px; border-radius:6px; font-size:11px; cursor:pointer; transition:all .15s ease;
   }
   .timer-preset:hover, .timer-preset.active{border-color:var(--gold); color:var(--gold-soft);}
-  .timer-custom{display:flex; gap:6px; margin-bottom:16px;}
-  .timer-custom input{
-    flex:1; min-width:0; background:var(--ink); border:1px solid var(--border); color:var(--text);
-    padding:7px 9px; border-radius:6px; font-size:12px;
+  .timer-custom-label{font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:6px;}
+  .timer-custom-hms{display:flex; gap:6px; margin-bottom:16px; align-items:flex-end;}
+  .timer-hms-field{display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; min-width:0;}
+  .timer-hms-field input{
+    width:100%; text-align:center; background:var(--ink); border:1px solid var(--border); color:var(--text);
+    padding:7px 4px; border-radius:6px; font-size:13px;
   }
-  .timer-custom .btn{padding:7px 12px; font-size:11px; flex-shrink:0;}
+  .timer-hms-field label{font-size:9.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;}
+  .timer-custom-hms .btn{padding:7px 12px; font-size:11px; flex-shrink:0; align-self:flex-end;}
   .timer-controls{display:flex; gap:8px;}
   .timer-controls .btn{flex:1; font-size:12px; padding:9px;}
   @media (max-width:640px){
@@ -384,16 +387,29 @@
   }
 
   /* ---------- mosaic rush ---------- */
-  .mosaic-grid{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;}
+  /* One real geometric rosette (the classic 8-pointed zellige star, matching the
+     border pattern used at the top of every page) lives behind the whole grid.
+     Each tile is a cover that lifts away when answered correctly — so the
+     artwork only reads as a coherent picture as the board fills in, the way a
+     real mosaic is one image built of many small pieces, not repeated icons. */
+  .mosaic-grid{
+    position:relative;
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:4px;
+    padding:10px; border-radius:10px; border:1px solid var(--border);
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20500%20400%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F1B2D%22/%3E%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%2316233A%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%237a5f2e%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%22500%22%20height%3D%22400%22%20fill%3D%22url%28%23sky%29%22/%3E%3Ccircle%20cx%3D%2255%22%20cy%3D%2245%22%20r%3D%222%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%22130%22%20cy%3D%2285%22%20r%3D%221.6%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2235%22%20r%3D%221.6%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%22310%22%20cy%3D%2270%22%20r%3D%222%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%2295%22%20cy%3D%22130%22%20r%3D%221.4%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%2260%22%20r%3D%221.4%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%22450%22%20cy%3D%22140%22%20r%3D%221.6%22%20fill%3D%22%23F2ECDD%22/%3E%3Ccircle%20cx%3D%22385%22%20cy%3D%2295%22%20r%3D%2236%22%20fill%3D%22%23e3c988%22/%3E%3Ccircle%20cx%3D%22400%22%20cy%3D%2284%22%20r%3D%2231%22%20fill%3D%22%2316233A%22/%3E%3Crect%20x%3D%22160%22%20y%3D%22330%22%20width%3D%22280%22%20height%3D%2255%22%20fill%3D%22%230a1420%22/%3E%3Cpath%20d%3D%22M%20250%20260%20A%2040%2040%200%200%201%20330%20260%20L%20330%20300%20L%20250%20300%20Z%22%20fill%3D%22%230a1420%22/%3E%3Crect%20x%3D%22245%22%20y%3D%22300%22%20width%3D%2290%22%20height%3D%2235%22%20fill%3D%22%230a1420%22/%3E%3Cline%20x1%3D%22290%22%20y1%3D%22220%22%20x2%3D%22290%22%20y2%3D%22182%22%20stroke%3D%22%230a1420%22%20stroke-width%3D%223%22/%3E%3Ccircle%20cx%3D%22290%22%20cy%3D%22179%22%20r%3D%225%22%20fill%3D%22%230a1420%22/%3E%3Crect%20x%3D%22140%22%20y%3D%22245%22%20width%3D%2218%22%20height%3D%22140%22%20fill%3D%22%230a1420%22/%3E%3Cpath%20d%3D%22M%20138%20245%20L%20149%20202%20L%20160%20245%20Z%22%20fill%3D%22%230a1420%22/%3E%3Cline%20x1%3D%22149%22%20y1%3D%22202%22%20x2%3D%22149%22%20y2%3D%22178%22%20stroke%3D%22%230a1420%22%20stroke-width%3D%222%22/%3E%3Ccircle%20cx%3D%22149%22%20cy%3D%22175%22%20r%3D%224%22%20fill%3D%22%230a1420%22/%3E%3Crect%20x%3D%22422%22%20y%3D%22245%22%20width%3D%2218%22%20height%3D%22140%22%20fill%3D%22%230a1420%22/%3E%3Cpath%20d%3D%22M%20420%20245%20L%20431%20202%20L%20442%20245%20Z%22%20fill%3D%22%230a1420%22/%3E%3Cline%20x1%3D%22431%22%20y1%3D%22202%22%20x2%3D%22431%22%20y2%3D%22178%22%20stroke%3D%22%230a1420%22%20stroke-width%3D%222%22/%3E%3Ccircle%20cx%3D%22431%22%20cy%3D%22175%22%20r%3D%224%22%20fill%3D%22%230a1420%22/%3E%3Cpath%20d%3D%22M%20270%20385%20L%20270%20352%20A%2020%2020%200%200%201%20310%20352%20L%20310%20385%20Z%22%20fill%3D%22%231C2C47%22/%3E%3Ccircle%20cx%3D%22210%22%20cy%3D%22315%22%20r%3D%229%22%20fill%3D%22%231C2C47%22/%3E%3Ccircle%20cx%3D%22370%22%20cy%3D%22315%22%20r%3D%229%22%20fill%3D%22%231C2C47%22/%3E%3C/svg%3E");
+    background-size:cover; background-position:center;
+  }
   .mosaic-tile{
-    aspect-ratio:1; border-radius:4px; border:1px solid var(--border); background:var(--panel);
-    transition:all .3s ease;
+    aspect-ratio:1; border-radius:3px; border:1px solid var(--border); background:var(--panel);
+    transition:all .4s ease;
   }
   .mosaic-tile.filled{
-    background:linear-gradient(135deg, var(--gold), var(--teal));
-    border-color:var(--gold);
-    box-shadow:0 0 8px rgba(201,162,75,0.5);
+    background:transparent; border-color:rgba(201,162,75,0.35);
+    box-shadow:inset 0 0 6px rgba(0,0,0,0.35);
+    animation:mosaicReveal .45s ease;
   }
+  @keyframes mosaicReveal{from{opacity:0; transform:scale(0.6);} to{opacity:1; transform:scale(1);}}
+
 
   .sentence-toggle{
     margin-top:10px; font-size:12px; color:var(--teal-soft); cursor:pointer; letter-spacing:0.04em;
@@ -2655,8 +2671,20 @@ function initTimerWidget(){
         <button class="timer-preset" data-min="20">20m</button>
         <button class="timer-preset" data-min="30">30m</button>
       </div>
-      <div class="timer-custom">
-        <input type="number" id="timerCustomInput" min="1" max="240" placeholder="Custom min">
+      <div class="timer-custom-label">Custom duration</div>
+      <div class="timer-custom-hms">
+        <div class="timer-hms-field">
+          <input type="number" id="timerHoursInput" min="0" max="23" placeholder="0">
+          <label for="timerHoursInput">hr</label>
+        </div>
+        <div class="timer-hms-field">
+          <input type="number" id="timerMinutesInput" min="0" max="59" placeholder="0">
+          <label for="timerMinutesInput">min</label>
+        </div>
+        <div class="timer-hms-field">
+          <input type="number" id="timerSecondsInput" min="0" max="59" placeholder="0">
+          <label for="timerSecondsInput">sec</label>
+        </div>
         <button class="btn" id="timerCustomSet">Set</button>
       </div>
       <div class="timer-controls">
@@ -2686,10 +2714,12 @@ function initTimerWidget(){
     });
   });
   document.getElementById("timerCustomSet").addEventListener("click", ()=>{
-    const input = document.getElementById("timerCustomInput");
-    const min = parseInt(input.value);
-    if(min > 0 && min <= 240){
-      setTimerDuration(min*60);
+    const h = parseInt(document.getElementById("timerHoursInput").value) || 0;
+    const m = parseInt(document.getElementById("timerMinutesInput").value) || 0;
+    const s = parseInt(document.getElementById("timerSecondsInput").value) || 0;
+    const total = h*3600 + m*60 + s;
+    if(total > 0 && total <= 24*3600){
+      setTimerDuration(total);
       document.querySelectorAll(".timer-preset").forEach(b=>b.classList.remove("active"));
     }
   });
@@ -2737,9 +2767,12 @@ function resetTimer(){
   updateTimerDisplay();
 }
 function updateTimerDisplay(){
-  const m = Math.floor(timerState.remaining/60);
+  const h = Math.floor(timerState.remaining/3600);
+  const m = Math.floor((timerState.remaining%3600)/60);
   const s = timerState.remaining%60;
-  const text = m+":"+String(s).padStart(2,"0");
+  const text = h>0
+    ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+    : `${m}:${String(s).padStart(2,"0")}`;
   const display = document.getElementById("timerDisplay");
   if(display) display.textContent = text;
   const fab = document.getElementById("timerFab");
@@ -4280,8 +4313,8 @@ function renderMosaicRush(){
       <div class="quiz-wrap">
         <div class="fc-done">
           <div style="font-size:44px;">${mrState.tilesFilled>=MOSAIC_SIZE ? "🏆" : "⏱️"}</div>
-          <div class="big">${mrState.tilesFilled>=MOSAIC_SIZE ? "Mosaic complete!" : "Time's up!"}</div>
-          <p style="color:var(--text-muted);">${mrState.score} correct · ${mrState.tilesFilled}/${MOSAIC_SIZE} tiles placed</p>
+          <div class="big">${mrState.tilesFilled>=MOSAIC_SIZE ? "The skyline is revealed!" : "Time's up!"}</div>
+          <p style="color:var(--text-muted);">${mrState.score} correct · ${mrState.tilesFilled}/${MOSAIC_SIZE} tiles cleared from the night sky</p>
           <div class="mosaic-grid" style="margin:20px auto; max-width:280px;">${tilesHtml}</div>
           <div class="fc-controls" style="margin-top:12px;">
             <button class="btn primary" id="mrAgain">Play again</button>
@@ -4306,6 +4339,7 @@ function renderMosaicRush(){
         <div class="quiz-score">🕌 ${mrState.label} · Score ${mrState.score} · Lives ${"❤️".repeat(mrState.lives)} · ⏳ <span id="mrTimeLeft">${mrState.timeLeft}</span>s</div>
         <button class="exit-btn" id="mrExitBtn">✕ Exit</button>
       </div>
+      <p class="alpha-intro" style="text-align:center; margin-bottom:14px;">Clear the tiles covering the night sky before time or lives run out — get enough right to reveal the skyline underneath.</p>
       <div class="mosaic-grid" id="mosaicGrid" style="margin:0 auto 22px; max-width:280px;">${tilesHtml}</div>
       <div class="quiz-direction-label" style="text-align:center;">Choose the Arabic word for:</div>
       <div class="quiz-word quiz-word-en" style="margin-bottom:14px;">${w.e}</div>

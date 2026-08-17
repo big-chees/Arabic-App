@@ -458,11 +458,27 @@
   .speak-btn:hover{transform:scale(1.1);}
   .speak-btn:active{transform:scale(0.92);}
 
-  .harakat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin-bottom:10px;}
+  .harakat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-bottom:10px;}
   .harakat-card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; align-items:center; gap:14px;}
+  .harakat-speak-btn{flex-shrink:0;}
+  .harakat-contrast{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+  .harakat-base{
+    font-family:'Noto Naskh Arabic','Amiri',serif; font-size:26px; color:var(--text-muted);
+    direction:rtl; text-align:center; opacity:0.65;
+  }
+  .harakat-arrow{color:var(--text-muted); font-size:13px; opacity:0.6;}
+  .harakat-card-base{border-color:var(--gold);}
+  .harakat-glyph-solo{font-size:46px; min-width:60px;}
   .harakat-glyph{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:38px; color:var(--gold-soft); direction:rtl; min-width:50px; text-align:center;}
   .harakat-info .name{font-family:'Fraunces',serif; font-weight:600; font-size:15px;}
   .harakat-info .desc{font-size:12px; color:var(--text-muted); margin-top:3px; line-height:1.5;}
+  .harakat-extra{
+    display:flex; align-items:center; gap:8px; margin-top:9px; padding-top:9px;
+    border-top:1px dashed var(--border);
+  }
+  .harakat-extra-word{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:18px; color:var(--teal-soft); direction:rtl;}
+  .harakat-extra-meta{font-size:11px; color:var(--text-muted); flex:1;}
+  .harakat-extra-speak{width:26px; height:26px; font-size:10.5px; flex-shrink:0;}
 
   /* ---------- conjugations ---------- */
   .grammar-explainer{
@@ -2355,12 +2371,17 @@ const ALPHABET = [
 ];
 
 const HARAKAT = [
-  {glyph:"بَ", name:"Fatha", desc:"A short diagonal stroke above the letter — adds a short \"a\" sound, like the 'u' in \"cup\". بَ = \"ba\"."},
-  {glyph:"بِ", name:"Kasra", desc:"A short diagonal stroke below the letter — adds a short \"i\" sound, like the 'i' in \"sit\". بِ = \"bi\"."},
-  {glyph:"بُ", name:"Damma", desc:"A small curl above the letter — adds a short \"u\" sound, like the 'oo' in \"book\". بُ = \"bu\"."},
-  {glyph:"بْ", name:"Sukun", desc:"A small circle above the letter — means no vowel follows; the consonant is closed. بْ = \"b\"."},
-  {glyph:"بّ", name:"Shadda", desc:"A small w-shape above the letter — doubles the consonant. بّ = \"bb\"."},
-  {glyph:"بً بٍ بٌ", name:"Tanwin", desc:"Doubled fatha/kasra/damma at the end of a word — adds an \"n\" sound, mostly marking grammatical case in formal Arabic: -an, -in, -un."}
+  {isBase:true, glyph:"ب", name:"Base Letter (no mark)", desc:"The bare consonant with no vowel at all — this is what every letter looks like before any tashkeel is added. Compare this pure, unvowelled sound to each marked version below."},
+  {base:"ب", glyph:"بَ", name:"Fatha", desc:"A short diagonal stroke above the letter — adds a short \"a\" sound, like the 'u' in \"cup\". بَ = \"ba\"."},
+  {base:"ب", glyph:"بِ", name:"Kasra", desc:"A short diagonal stroke below the letter — adds a short \"i\" sound, like the 'i' in \"sit\". بِ = \"bi\"."},
+  {base:"ب", glyph:"بُ", name:"Damma", desc:"A small curl above the letter — adds a short \"u\" sound, like the 'oo' in \"book\". بُ = \"bu\"."},
+  {base:"ب", glyph:"بْ", name:"Sukun", desc:"A small circle above the letter — means no vowel follows; the consonant is closed. بْ = \"b\".", noSpeak:true,
+    extra:{word:"حِبْر", t:"hibr", e:"ink — sukun closing the ب itself"}},
+  {base:"ب", glyph:"بّ", name:"Shadda", desc:"A small w-shape above the letter — doubles the consonant. بّ = \"bb\".", noSpeak:true,
+    extra:{word:"حُبّ", t:"hubb", e:"love — shadda doubling the ب itself"}},
+  {base:"ب", glyph:"بً", name:"Fathatain", desc:"Two fathas together at the end of a word — adds an \"an\" sound, marking indefinite accusative case in formal Arabic. بً = \"ban\".", noSpeak:true},
+  {base:"ب", glyph:"بٍ", name:"Kasratain", desc:"Two kasras together at the end of a word — adds an \"in\" sound, marking indefinite genitive case in formal Arabic. بٍ = \"bin\".", noSpeak:true},
+  {base:"ب", glyph:"بٌ", name:"Dammatain", desc:"Two dammas together at the end of a word — adds an \"un\" sound, marking indefinite nominative case in formal Arabic. بٌ = \"bun\".", noSpeak:true}
 ];
 
 function speak(text){
@@ -3418,7 +3439,7 @@ function renderAlphabet(){
         So think of tashkeel as training wheels, not a permanent feature: right now it helps you pronounce words correctly and hear the grammar (a fatha vs. a kasra can be the whole difference between "he" and "you" in a verb). As your reading improves, you'll gradually rely on it less — which is exactly what happens to every native speaker. Use the toggle at the top of the page to show tashkeel on words throughout the app wherever it's available.
       </div>
     </div>
-    <p class="alpha-intro" style="margin-bottom:20px;">The six marks themselves:</p>
+    <p class="alpha-intro" style="margin-bottom:20px;">The base letter, and the eight marks that can dress it:</p>
     <div class="harakat-grid" id="harakatGrid"></div>
   `;
   const grid = document.getElementById("alphaGrid");
@@ -3456,14 +3477,34 @@ function renderAlphabet(){
   const hgrid = document.getElementById("harakatGrid");
   HARAKAT.forEach(h=>{
     const card = document.createElement("div");
-    card.className="harakat-card";
+    card.className="harakat-card" + (h.isBase ? " harakat-card-base" : "");
+    const glyphHtml = h.isBase
+      ? `<div class="harakat-contrast"><span class="harakat-glyph harakat-glyph-solo">${h.glyph}</span></div>`
+      : `<div class="harakat-contrast">
+           <span class="harakat-base" title="Bare letter, no mark">${h.base}</span>
+           <span class="harakat-arrow">→</span>
+           <span class="harakat-glyph">${h.glyph}</span>
+         </div>`;
     card.innerHTML = `
-      <div class="harakat-glyph">${h.glyph}</div>
+      ${glyphHtml}
       <div class="harakat-info">
         <div class="name">${h.name}</div>
         <div class="desc">${h.desc}</div>
+        ${h.extra ? `
+          <div class="harakat-extra">
+            <span class="harakat-extra-word">${h.extra.word}</span>
+            <span class="harakat-extra-meta">${h.extra.t} — ${h.extra.e}</span>
+            <button class="speak-btn harakat-extra-speak" title="Listen">🔊</button>
+          </div>` : ""}
       </div>
+      ${h.noSpeak ? "" : '<button class="speak-btn harakat-speak-btn" title="Listen">🔊</button>'}
     `;
+    if(!h.noSpeak){
+      card.querySelector(".harakat-speak-btn").addEventListener("click", ()=>speak(h.glyph));
+    }
+    if(h.extra){
+      card.querySelector(".harakat-extra-speak").addEventListener("click", ()=>speak(h.extra.word));
+    }
     hgrid.appendChild(card);
   });
 }

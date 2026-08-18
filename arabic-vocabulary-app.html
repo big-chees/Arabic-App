@@ -93,7 +93,7 @@
   .search-row .meta{font-size:12px; color:var(--text-muted); text-align:right;}
   .search-empty{padding:14px; font-size:13px; color:var(--text-muted);}
 
-  nav.pillnav{display:flex; gap:8px; flex-wrap:wrap;}
+  nav.pillnav{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
   .pill{
     background:transparent; border:1px solid var(--border); color:var(--text-muted);
     padding:9px 16px; border-radius:999px; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif;
@@ -101,6 +101,18 @@
   }
   .pill:hover{border-color:var(--gold); color:var(--text);}
   .pill.active{background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:600;}
+
+  .learn-dropdown{position:relative; flex-shrink:0;}
+  .learn-menu{
+    position:absolute; top:100%; right:0; margin-top:8px; background:var(--panel-2); border:1px solid var(--gold);
+    border-radius:10px; padding:6px; min-width:210px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:150;
+  }
+  .learn-menu-item{
+    display:block; width:100%; text-align:left; background:none; border:none; color:var(--text);
+    padding:10px 12px; border-radius:6px; font-size:13.5px; cursor:pointer; font-family:'Inter',sans-serif;
+    transition:background .15s ease;
+  }
+  .learn-menu-item:hover{background:rgba(201,162,75,0.12);}
 
   .tashkeel-toggle{
     background:transparent; border:1px solid var(--teal); color:var(--teal-soft);
@@ -148,6 +160,47 @@
   }
   .root-letters{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:28px; color:var(--gold-soft); direction:rtl; letter-spacing:4px;}
   .root-meaning{font-size:12.5px; color:var(--teal-soft); margin:4px 0 14px; font-style:italic;}
+
+  /* ---------- how sentences work (grammar guide) ---------- */
+  .pos-legend{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-top:6px;}
+  .pos-card{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px;}
+  .pos-tag-badge{
+    display:inline-block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    padding:3px 9px; border-radius:999px; margin-bottom:8px;
+  }
+  .tag-n{background:rgba(201,162,75,0.18); color:var(--gold);}
+  .tag-v{background:rgba(47,166,160,0.18); color:var(--teal-soft);}
+  .tag-adj{background:rgba(76,165,122,0.18); color:var(--good);}
+  .tag-pron{background:rgba(227,201,136,0.18); color:var(--gold-soft);}
+  .tag-prep{background:rgba(127,212,206,0.18); color:var(--teal-soft);}
+  .tag-part{background:rgba(193,85,74,0.18); color:var(--danger);}
+  .tag-adv{background:rgba(147,164,188,0.18); color:var(--text-muted);}
+  .tag-num{background:rgba(201,162,75,0.12); color:var(--gold-soft); border:1px dashed rgba(201,162,75,0.4);}
+  .pos-example{font-family:'Noto Naskh Arabic','Amiri',serif; font-size:18px; color:var(--text); direction:rtl; display:block; margin-bottom:6px;}
+  .pos-desc{font-size:12px; color:var(--text-muted); line-height:1.5;}
+
+  .diagram-list{display:flex; flex-direction:column; gap:16px; margin-bottom:28px;}
+  .sentence-diagram{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px;}
+  .diagram-kind{font-size:11px; color:var(--teal-soft); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px;}
+  .diagram-ar{
+    font-family:'Noto Naskh Arabic','Amiri',serif; font-size:26px; color:var(--gold-soft); direction:rtl;
+    display:flex; align-items:center; gap:12px; justify-content:flex-end;
+  }
+  .diagram-speak-btn{flex-shrink:0; width:32px; height:32px; font-size:13px;}
+  .diagram-en{font-size:13px; color:var(--text-muted); font-style:italic; margin:6px 0 16px; text-align:right;}
+  .diagram-words{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+  .diagram-word{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:10px 12px;
+    display:flex; flex-direction:column; align-items:center; gap:6px; min-width:100px;
+  }
+  .diagram-word-ar-btn{
+    background:none; border:none; cursor:pointer; font-family:'Noto Naskh Arabic','Amiri',serif;
+    font-size:19px; color:var(--text); direction:rtl; padding:0;
+  }
+  .diagram-word-ar-btn:hover{color:var(--gold-soft);}
+  .diagram-word-en{font-size:11px; color:var(--text-muted);}
+  .grammar-cta{display:flex; gap:12px; flex-wrap:wrap; margin:8px 0 20px;}
+
   .root-word-row{
     display:flex; justify-content:space-between; align-items:center; gap:8px;
     padding:9px 0; border-bottom:1px dashed var(--border);
@@ -682,6 +735,9 @@
   .confirm-message{font-size:14px; line-height:1.6; margin-bottom:20px;}
   .confirm-actions{display:flex; gap:10px; justify-content:flex-end;}
   .confirm-actions .btn{padding:10px 18px; font-size:13px;}
+  .welcome-back-modal{text-align:center;}
+  .welcome-back-icon{font-size:38px; margin-bottom:6px;}
+  .welcome-back-title{font-family:'Fraunces',serif; font-weight:600; font-size:19px; margin-bottom:10px;}
 
   /* ---------- history ---------- */
   .hist-row{
@@ -781,13 +837,19 @@
   </div>
   <nav class="pillnav">
     <button class="pill active" data-view="home">Categories</button>
-    <button class="pill" data-view="alphabet">Alphabet</button>
-    <button class="pill" data-view="conjugations">Conjugations</button>
-    <button class="pill" data-view="roots">Roots</button>
+    <button class="pill" data-view="sentences-all">Sentences</button>
     <button class="pill" data-view="builder">Sentence Builder</button>
     <button class="pill" data-view="review">Review</button>
     <button class="pill" data-view="history">History</button>
-    <button class="pill" data-view="sentences-all">Sentences</button>
+    <div class="learn-dropdown">
+      <button class="pill learn-pill" id="learnDropdownBtn">Learn ▾</button>
+      <div class="learn-menu" id="learnMenu" style="display:none;">
+        <button class="learn-menu-item" data-view="alphabet">🔤 Alphabet</button>
+        <button class="learn-menu-item" data-view="conjugations">📖 Conjugations</button>
+        <button class="learn-menu-item" data-view="roots">🌳 Roots</button>
+        <button class="learn-menu-item" data-view="grammar">🏛️ How Sentences Work</button>
+      </div>
+    </div>
   </nav>
   <button class="tashkeel-toggle" id="tashkeelToggle" title="Show vowel marks (tashkeel) on words where available">
     <span class="tk-sample">اَبَتَ</span> Tashkeel: <span id="tkState">Off</span>
@@ -2705,6 +2767,49 @@ function statusBadgeHtml(status){
   return `<span class="status-badge status-${status}">${STATUS_LABELS[status]}</span>`;
 }
 
+// Sentence practice (Random Practice / Meaning Quiz / viewing the list) is a genuinely
+// different activity from vocab drilling, and uses the same underlying words — so it must
+// NOT reuse getSubStatus/getCatStatus above, or a subcategory mastered purely through
+// Flashcards would misleadingly show as "in progress"/"mastered" on the Sentences pages
+// too, even though its sentences had never actually been opened. There's also no real
+// per-sentence "mastery" concept the way there is for vocab words, so this is intentionally
+// just a binary visited/not-visited signal rather than fake progress/full precision.
+const SENTENCE_VISITED_KEY = "visited-sentence-subs-v1";
+let VISITED_SENTENCE_SUBS = new Set();
+async function loadVisitedSentenceSubs(){
+  try{
+    let raw = null;
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(SENTENCE_VISITED_KEY, false);
+      if(res && res.value) raw = res.value;
+    } else if(STORAGE_BACKEND === "local"){
+      raw = localStorage.getItem(SENTENCE_VISITED_KEY);
+    } else if(_memoryStore[SENTENCE_VISITED_KEY]){
+      raw = _memoryStore[SENTENCE_VISITED_KEY];
+    }
+    if(raw) VISITED_SENTENCE_SUBS = new Set(JSON.parse(raw));
+  }catch(e){ /* none yet */ }
+}
+async function saveVisitedSentenceSubsNow(){
+  const json = JSON.stringify(Array.from(VISITED_SENTENCE_SUBS));
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(SENTENCE_VISITED_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(SENTENCE_VISITED_KEY, json);
+    else _memoryStore[SENTENCE_VISITED_KEY] = json;
+  }catch(e){ console.warn("Visited-sentence-subs save failed", e); }
+}
+function markSentenceSubVisited(subId){
+  if(!subId || VISITED_SENTENCE_SUBS.has(subId)) return;
+  VISITED_SENTENCE_SUBS.add(subId);
+  saveVisitedSentenceSubsNow();
+}
+function getSentenceSubStatus(sub){
+  return VISITED_SENTENCE_SUBS.has(sub.id) ? "opened" : "none";
+}
+function getSentenceCatStatus(cat){
+  return cat.subs.some(s=>VISITED_SENTENCE_SUBS.has(s.id)) ? "opened" : "none";
+}
+
 // Returns {demoted} — demoted=true when a mastered word was just missed and downgraded to "shaky"
 function markResult(word, correct){
   recordActivityToday();
@@ -3052,12 +3157,33 @@ function setView(view, catId, subId){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 document.getElementById("brandHome").addEventListener("click", ()=>setView("home"));
-document.querySelectorAll(".pillnav .pill").forEach(p=>{
+const LEARN_VIEWS = ["alphabet","conjugations","roots","grammar"];
+document.querySelectorAll(".pillnav .pill[data-view]").forEach(p=>{
   p.addEventListener("click", ()=>{
     document.querySelectorAll(".pillnav .pill").forEach(x=>x.classList.remove("active"));
     p.classList.add("active");
     setView(p.dataset.view);
   });
+});
+document.querySelectorAll(".learn-menu-item").forEach(item=>{
+  item.addEventListener("click", ()=>{
+    document.getElementById("learnMenu").style.display = "none";
+    setView(item.dataset.view);
+    document.querySelectorAll(".pillnav .pill").forEach(x=>x.classList.remove("active"));
+    document.getElementById("learnDropdownBtn").classList.add("active");
+  });
+});
+document.getElementById("learnDropdownBtn").addEventListener("click", (e)=>{
+  e.stopPropagation();
+  const menu = document.getElementById("learnMenu");
+  menu.style.display = menu.style.display === "none" ? "block" : "none";
+});
+document.addEventListener("click", (e)=>{
+  const menu = document.getElementById("learnMenu");
+  const btn = document.getElementById("learnDropdownBtn");
+  if(menu && menu.style.display !== "none" && !menu.contains(e.target) && e.target !== btn){
+    menu.style.display = "none";
+  }
 });
 document.getElementById("tashkeelToggle").addEventListener("click", ()=>{
   showTashkeel = !showTashkeel;
@@ -3140,6 +3266,36 @@ function renderContinueCard(){
     </div>
   `;
   document.getElementById("continueBtn").addEventListener("click", resumeLastActivity);
+}
+
+// A one-time "welcome back" popup shown on app open (not on every navigation) when there's
+// a saved last activity — this is in addition to, not instead of, the always-visible
+// continue-banner on the home page itself.
+function showWelcomeBackPopup(){
+  if(!LAST_ACTIVITY) return;
+  const cat = DATA.categories.find(c=>c.id===LAST_ACTIVITY.catId);
+  const sub = cat && cat.subs.find(s=>s.id===LAST_ACTIVITY.subId);
+  if(!cat || !sub) return;
+  const meta = ACTIVITY_LABELS[LAST_ACTIVITY.mode] || {icon:"📍", label:"Practice"};
+  const overlay = document.createElement("div");
+  overlay.id = "welcomeBackOverlay";
+  overlay.className = "confirm-overlay";
+  overlay.innerHTML = `
+    <div class="confirm-modal welcome-back-modal">
+      <div class="welcome-back-icon">${meta.icon}</div>
+      <div class="welcome-back-title">Welcome back!</div>
+      <div class="confirm-message" style="text-align:center;">Pick up where you left off?<br><strong>${meta.label} — ${cat.en} — ${sub.en}</strong></div>
+      <div class="confirm-actions" style="justify-content:center;">
+        <button class="btn" id="welcomeBackDismiss">Not now</button>
+        <button class="btn primary" id="welcomeBackResume">Resume →</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const cleanup = ()=>overlay.remove();
+  document.getElementById("welcomeBackDismiss").addEventListener("click", cleanup);
+  document.getElementById("welcomeBackResume").addEventListener("click", ()=>{ cleanup(); resumeLastActivity(); });
+  overlay.addEventListener("click", (e)=>{ if(e.target===overlay) cleanup(); });
 }
 
 function renderDueToday(){
@@ -3630,7 +3786,150 @@ function renderRoots(){
   });
 }
 
-/* ============================= RENDER: ALPHABET ============================= */
+/* ============================= RENDER: HOW SENTENCES WORK (GRAMMAR GUIDE) ============================= */
+function renderGrammarGuide(){
+  activeRerender = renderGrammarGuide;
+  const diagrams = [
+    {
+      ar:"هَذَا الْكِتَابُ جَدِيدٌ", en:'"This book is new."', kind:"Nominal sentence — no verb needed",
+      words:[
+        {ar:"هَذَا", t:"hādha", tag:"pron", label:"demonstrative", en:"this"},
+        {ar:"الْكِتَابُ", t:"al-kitābu", tag:"n", label:"noun · subject", en:"the book"},
+        {ar:"جَدِيدٌ", t:"jadīdun", tag:"adj", label:"adjective · predicate", en:"new"}
+      ]
+    },
+    {
+      ar:"يَشْرَبُ الْوَلَدُ الْحَلِيبَ", en:'"The boy drinks the milk."', kind:"Verbal sentence — verb comes first",
+      words:[
+        {ar:"يَشْرَبُ", t:"yashrabu", tag:"v", label:"verb", en:"drinks"},
+        {ar:"الْوَلَدُ", t:"al-waladu", tag:"n", label:"noun · subject", en:"the boy"},
+        {ar:"الْحَلِيبَ", t:"al-ḥalība", tag:"n", label:"noun · object", en:"the milk"}
+      ]
+    },
+    {
+      ar:"الْكِتَابُ عَلَى الطَّاوِلَةِ", en:'"The book is on the table."', kind:"Nominal sentence — predicate is a prepositional phrase",
+      words:[
+        {ar:"الْكِتَابُ", t:"al-kitābu", tag:"n", label:"noun · subject", en:"the book"},
+        {ar:"عَلَى", t:"‘alā", tag:"prep", label:"preposition", en:"on"},
+        {ar:"الطَّاوِلَةِ", t:"al-ṭāwilati", tag:"n", label:"noun · object of preposition", en:"the table"}
+      ]
+    },
+    {
+      ar:"أَيْنَ الْمَطْعَمُ؟", en:'"Where is the restaurant?"', kind:"Question — question word first",
+      words:[
+        {ar:"أَيْنَ", t:"ayna", tag:"part", label:"question word", en:"where"},
+        {ar:"الْمَطْعَمُ", t:"al-maṭ‘amu", tag:"n", label:"noun · subject", en:"the restaurant"}
+      ]
+    }
+  ];
+  main.innerHTML = `
+    <div class="hero" style="padding:6px 0 18px; text-align:left;">
+      <h1 class="hero-title" style="margin-top:0;">How Arabic <em>sentences</em> work</h1>
+      <p class="alpha-intro">Vocabulary alone doesn't make sentences — you also need to know how the pieces fit together, and Arabic assembles them differently than English does. This page covers the core rules; then take them to the <a data-nav="builder-link" style="color:var(--teal-soft); cursor:pointer; text-decoration:underline;">Sentence Builder</a> to practice assembling real ones, or to <a data-nav="sentences-link" style="color:var(--teal-soft); cursor:pointer; text-decoration:underline;">Sentences</a> to see hundreds of premade examples in context.</p>
+    </div>
+
+    <div class="grammar-explainer">
+      <h3>🏛️ Two kinds of sentences</h3>
+      <p class="alpha-intro" style="margin-bottom:0;">Arabic doesn't have one universal sentence template the way English leans on "subject–verb–object." There are two distinct patterns, and which one you use changes the whole shape of the sentence.</p>
+      <div class="grammar-terms">
+        <div class="grammar-term">
+          <div class="term-name">الجملة الاسمية — the nominal sentence</div>
+          <div class="term-desc">Starts with a noun. In the present tense, Arabic has <strong>no word for "is/am/are"</strong> — you just place the subject next to its description and the "is" is understood. <span class="grammar-example" data-ex="الْبَيْتُ كَبِيرٌ"></span> literally reads "the-house big" — and that's the complete sentence for "The house is big."</div>
+        </div>
+        <div class="grammar-term">
+          <div class="term-name">الجملة الفعلية — the verbal sentence</div>
+          <div class="term-desc">Starts with a verb, before the subject — the reverse of English order. Standard structure is <strong>Verb → Subject → Object</strong>: <span class="grammar-example" data-ex="كَتَبَ الْوَلَدُ رِسَالَةً"></span> is literally "wrote the-boy a-letter" — "The boy wrote a letter." Putting the subject first (Subject → Verb → Object, like English) is also correct and common, especially in speech — it just shifts emphasis onto the subject.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grammar-explainer">
+      <h3>🔤 Adjectives: after the noun, and doubly definite</h3>
+      <p class="alpha-intro" style="margin-bottom:14px;">This is the rule that trips up most English speakers first, because it inverts two things at once.</p>
+      <div class="grammar-terms">
+        <div class="grammar-term">
+          <div class="term-name">Order flips</div>
+          <div class="term-desc">The adjective comes <em>after</em> the noun it describes, not before: <span class="grammar-example" data-ex="بَيْتٌ كَبِيرٌ"></span> is literally "house big" — "a big house."</div>
+        </div>
+        <div class="grammar-term">
+          <div class="term-name">"The" appears twice</div>
+          <div class="term-desc">When the noun is definite, the adjective takes الـ too — not just the noun: <span class="grammar-example" data-ex="الْبَيْتُ الْكَبِيرُ"></span> is literally "the-house the-big" — "the big house." Dropping الـ from the adjective would accidentally turn this into a full sentence ("The house is big") instead of a description.</div>
+        </div>
+        <div class="grammar-term">
+          <div class="term-name">Agreement</div>
+          <div class="term-desc">The adjective must match the noun's gender and number — a feminine noun needs the ة-marked form of the adjective, a plural noun needs a plural adjective. This is the same agreement system verbs use, covered on the Conjugations page.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grammar-explainer">
+      <h3>🧩 The building blocks — every word type, and what it does in a sentence</h3>
+      <p class="alpha-intro" style="margin-bottom:14px;">Every word in this app is tagged with one of these roles. Recognizing the tag tells you what job that word can do in a sentence — this is the same tag shown on the back of every flashcard.</p>
+      <div class="pos-legend" id="posLegend"></div>
+    </div>
+
+    <div class="section-label">See it assembled — real sentences, word by word</div>
+    <p class="alpha-intro" style="margin-bottom:20px;">Tap any word to hear it on its own.</p>
+    <div class="diagram-list" id="diagramList"></div>
+
+    <div class="grammar-cta">
+      <button class="btn primary" id="gotoBuilderBtn">✏️ Practice building sentences →</button>
+      <button class="btn teal" id="gotoSentencesBtn">📖 Browse premade sentences →</button>
+    </div>
+  `;
+  main.querySelector('[data-nav="builder-link"]').addEventListener("click", ()=>setView("builder"));
+  main.querySelector('[data-nav="sentences-link"]').addEventListener("click", ()=>renderSentencesHub());
+  document.getElementById("gotoBuilderBtn").addEventListener("click", ()=>setView("builder"));
+  document.getElementById("gotoSentencesBtn").addEventListener("click", ()=>renderSentencesHub());
+
+  const POS_INFO = [
+    {tag:"n", label:"Noun", desc:"A person, place, thing, or idea — can be the subject or object of a sentence.", ex:"بَيْت"},
+    {tag:"v", label:"Verb", desc:"An action or state — starts a verbal sentence, and conjugates for who's doing it.", ex:"كَتَبَ"},
+    {tag:"adj", label:"Adjective", desc:"Describes a noun — comes after it, and must match its gender/number/definiteness.", ex:"كَبِير"},
+    {tag:"pron", label:"Pronoun", desc:"Stands in for a noun — \"he,\" \"this,\" \"which,\" and attached possessive/object endings.", ex:"هَذَا"},
+    {tag:"prep", label:"Preposition", desc:"Links a noun to the rest of the sentence — \"in,\" \"on,\" \"to,\" \"from.\"", ex:"فِي"},
+    {tag:"part", label:"Particle", desc:"Small grammatical words — negation, question words, conjunctions like \"and\"/\"but.\"", ex:"لَا"},
+    {tag:"adv", label:"Adverb", desc:"Describes how, when, or where something happens.", ex:"دَائِمًا"},
+    {tag:"num", label:"Number", desc:"Counts or ranks nouns — has its own agreement rules covered on the Numbers pages.", ex:"ثَلَاثَة"}
+  ];
+  const legend = document.getElementById("posLegend");
+  legend.innerHTML = POS_INFO.map(p=>`
+    <div class="pos-card">
+      <span class="pos-tag-badge tag-${p.tag}">${p.label}</span>
+      <span class="pos-example">${p.ex}</span>
+      <div class="pos-desc">${p.desc}</div>
+    </div>
+  `).join("");
+
+  const list = document.getElementById("diagramList");
+  diagrams.forEach(d=>{
+    const card = document.createElement("div");
+    card.className = "sentence-diagram";
+    card.innerHTML = `
+      <div class="diagram-kind">${d.kind}</div>
+      <div class="diagram-ar">${d.ar}<button class="speak-btn diagram-speak-btn" title="Listen">🔊</button></div>
+      <div class="diagram-en">${d.en}</div>
+      <div class="diagram-words">
+        ${d.words.map(w=>`
+          <div class="diagram-word">
+            <button class="diagram-word-ar-btn" data-w="${w.ar}">${w.ar}</button>
+            <span class="pos-tag-badge tag-${w.tag}">${w.label}</span>
+            <span class="diagram-word-en">${w.en}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    card.querySelector(".diagram-speak-btn").addEventListener("click", ()=>speak(d.ar));
+    card.querySelectorAll(".diagram-word-ar-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>speak(btn.dataset.w));
+    });
+    list.appendChild(card);
+  });
+
+  populateExampleChips();
+}
+
+
 function renderAlphabet(){
   activeRerender = renderAlphabet;
   main.innerHTML = `
@@ -4189,7 +4488,7 @@ function renderSentencesHub(){
   const grid = document.getElementById("sentCatGrid");
   DATA.categories.forEach(c=>{
     const count = c.subs.reduce((s,sub)=>s+sub.words.length,0);
-    const status = getCatStatus(c);
+    const status = getSentenceCatStatus(c);
     const card = document.createElement("div");
     card.className="cat-card" + (status!=="none" ? " status-"+status : "");
     card.innerHTML = `
@@ -4200,7 +4499,46 @@ function renderSentencesHub(){
       <div class="count">${count} sentences · ${c.subs.length} subcategories</div>
       <span class="diff-badge ${c.diff}">${DIFF_META[c.diff].label}</span>
     `;
-    card.addEventListener("click", ()=>renderCategory(c.id));
+    card.addEventListener("click", ()=>renderSentencesCategoryPicker(c.id));
+    grid.appendChild(card);
+  });
+}
+
+/* ============================= RENDER: SENTENCES — CATEGORY → SUBCATEGORY PICKER ============================= */
+// Reached by clicking a category from the Sentences Hub. Unlike the regular category page
+// (which shows Flashcards/Quiz/Match/etc.), this stays entirely sentence-focused — each
+// subcategory card offers List / Random Practice / Meaning Quiz, scoped to that topic.
+function renderSentencesCategoryPicker(catId){
+  activeRerender = ()=>renderSentencesCategoryPicker(catId);
+  const cat = DATA.categories.find(c=>c.id===catId);
+  if(!cat){ renderSentencesHub(); return; }
+  main.innerHTML = `
+    <div class="crumbs"><a data-nav="sent-hub">Sentences</a> <span>›</span> <span>${cat.en}</span></div>
+    <div class="hero" style="padding:6px 0 28px;">
+      <div style="font-size:34px;">${cat.icon}</div>
+      <h1 class="hero-title" style="margin-top:8px;">${cat.en} <span class="name-ar" style="font-family:'Noto Naskh Arabic','Amiri',serif;color:var(--gold-soft);font-size:0.7em;">${displayArName(cat)}</span> — Sentences</h1>
+    </div>
+    <div class="sub-grid" id="sentSubGrid"></div>
+  `;
+  main.querySelector('[data-nav="sent-hub"]').addEventListener("click", renderSentencesHub);
+  const grid = document.getElementById("sentSubGrid");
+  cat.subs.forEach(sub=>{
+    const status = getSentenceSubStatus(sub);
+    const card = document.createElement("div");
+    card.className="sub-card" + (status!=="none" ? " status-"+status : "");
+    card.innerHTML = `
+      ${statusBadgeHtml(status)}
+      <span class="name-en">${sub.en}</span><span class="name-ar">${displayArName(sub)}</span>
+      <div class="count">${sub.words.length} sentences</div>
+      <div class="sub-actions">
+        <button class="btn" data-act="list">📖 View List</button>
+        <button class="btn primary" data-act="random">🎲 Random Practice</button>
+        <button class="btn teal" data-act="quiz">🎯 Meaning Quiz</button>
+      </div>
+    `;
+    card.querySelector('[data-act="list"]').addEventListener("click", ()=>renderSentences(cat.id, sub.id));
+    card.querySelector('[data-act="random"]').addEventListener("click", ()=>startSentencePractice(sub.words, sub.en, cat.id, sub.id));
+    card.querySelector('[data-act="quiz"]').addEventListener("click", ()=>startSentenceQuiz(sub.words, sub.en, cat.id, sub.id));
     grid.appendChild(card);
   });
 }
@@ -4209,6 +4547,7 @@ function renderSentencesHub(){
 let spState = {};
 function startSentencePractice(words, label, catId, subId){
   spState = { pool: words, label, catId, subId, current: null, revealed: false, count: 0 };
+  if(subId) markSentenceSubVisited(subId);
   nextRandomSentence();
 }
 function nextRandomSentence(){
@@ -4247,7 +4586,7 @@ function renderSentencePractice(){
   if(revealBtn) revealBtn.addEventListener("click", ()=>{ spState.revealed = true; renderSentencePractice(); });
   document.getElementById("spNextBtn").addEventListener("click", ()=>{ spState.count++; nextRandomSentence(); });
   document.getElementById("spExitBtn").addEventListener("click", ()=>{
-    if(spState.catId) renderCategory(spState.catId);
+    if(spState.catId) renderSentencesCategoryPicker(spState.catId);
     else renderSentencesHub();
   });
 }
@@ -4256,6 +4595,7 @@ function renderSentencePractice(){
 let sqState = {};
 function startSentenceQuiz(words, label, catId, subId){
   sqState = { pool: words, label, catId, subId, score:0, asked:0, current:null, options:null, answered:false };
+  if(subId) markSentenceSubVisited(subId);
   startQuizStopwatch();
   nextSentenceQuizQuestion();
 }
@@ -4291,7 +4631,7 @@ function renderSentenceQuiz(){
   document.getElementById("sqSpeakBtn").addEventListener("click", ()=>speak(w.s));
   document.getElementById("sqExitBtn").addEventListener("click", ()=>{
     stopQuizStopwatch();
-    if(sqState.catId) renderCategory(sqState.catId);
+    if(sqState.catId) renderSentencesCategoryPicker(sqState.catId);
     else renderSentencesHub();
   });
   const optWrap = document.getElementById("sqOptions");
@@ -4703,6 +5043,7 @@ function renderSentences(catId, subId){
     label = sub.en;
     crumbLabel = `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Sentences</span>`;
     recordLastActivity("sentences", catId, subId);
+    markSentenceSubVisited(subId);
   } else {
     words = allWords();
     label = "All Sentences";
@@ -4864,9 +5205,10 @@ function renderHistory(){
 
 function exportProgress(){
   const payload = {
-    app:"mufradat", formatVersion:2, exportedAt:new Date().toISOString(),
+    app:"mufradat", formatVersion:3, exportedAt:new Date().toISOString(),
     wordCount:Object.keys(PROGRESS).length, progress:PROGRESS,
-    streak:STREAK, lastActivity:LAST_ACTIVITY, visitedSubs:Array.from(VISITED_SUBS)
+    streak:STREAK, lastActivity:LAST_ACTIVITY, visitedSubs:Array.from(VISITED_SUBS),
+    visitedSentenceSubs:Array.from(VISITED_SENTENCE_SUBS)
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -4904,6 +5246,10 @@ function importProgressFile(file){
         if(Array.isArray(payload.visitedSubs)){
           payload.visitedSubs.forEach(id=>VISITED_SUBS.add(id));
           await saveVisitedSubsNow();
+        }
+        if(Array.isArray(payload.visitedSentenceSubs)){
+          payload.visitedSentenceSubs.forEach(id=>VISITED_SENTENCE_SUBS.add(id));
+          await saveVisitedSentenceSubsNow();
         }
       }
       const importedCount = Object.keys(incoming).length;
@@ -5121,6 +5467,7 @@ function render(){
   else if(state.view==="history") renderHistory();
   else if(state.view==="builder") startBuilder();
   else if(state.view==="roots") renderRoots();
+  else if(state.view==="grammar") renderGrammarGuide();
 }
 (async function init(){
   assignWordIds();
@@ -5129,8 +5476,10 @@ function render(){
   await loadStreak();
   await loadLastActivity();
   await loadVisitedSubs();
+  await loadVisitedSentenceSubs();
   render();
   initTimerWidget();
+  if(state.view === "home") setTimeout(showWelcomeBackPopup, 500);
   // Service worker: only registers over HTTPS/localhost (browsers block it on file:// pages).
   // This is what makes offline use + "Install app" work once this is hosted somewhere.
   if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){

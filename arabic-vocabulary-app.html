@@ -256,6 +256,10 @@
   .sub-card .name-en{font-family:'Fraunces',serif; font-size:17px; font-weight:600;}
   .sub-card .name-ar{font-family:'Noto Naskh Arabic','Amiri',serif; color:var(--gold-soft); font-size:16px; margin-left:6px;}
   .sub-card .count{font-size:12px; color:var(--text-muted); margin:6px 0 14px;}
+  .coverage-row{display:flex; align-items:center; gap:10px; margin:-6px 0 14px;}
+  .coverage-bar{flex:1; height:6px; border-radius:999px; background:var(--panel-2); overflow:hidden;}
+  .coverage-fill{height:100%; background:linear-gradient(90deg, var(--teal), var(--gold)); border-radius:999px; transition:width .3s ease;}
+  .coverage-label{font-size:10.5px; color:var(--text-muted); flex-shrink:0; white-space:nowrap;}
   .sub-actions{display:flex; gap:8px; flex-wrap:wrap;}
   .sub-actions-games{margin-top:8px;}
   .sub-actions-games .btn{font-size:11px; padding:8px 12px;}
@@ -2810,8 +2814,64 @@ function getSentenceCatStatus(cat){
   return cat.subs.some(s=>VISITED_SENTENCE_SUBS.has(s.id)) ? "opened" : "none";
 }
 
+// A finer-grained companion to the visited flag above: exactly which individual sentences
+// (by word id — each word has exactly one example sentence) have actually been drawn in
+// Random Practice or asked in the Meaning Quiz. This is deliberately just an exposure count,
+// not a mastery claim — "seen" isn't "learned." It lets a coverage bar show real gaps (with
+// pure random draws, it's entirely possible to hit "next" dozens of times and still never see
+// several sentences in a small subcategory by chance), and lets practice nudge toward
+// whatever hasn't come up yet instead of re-showing the same handful forever.
+const SEEN_SENTENCES_KEY = "seen-sentences-v1";
+let SEEN_SENTENCE_IDS = new Set();
+async function loadSeenSentences(){
+  try{
+    let raw = null;
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(SEEN_SENTENCES_KEY, false);
+      if(res && res.value) raw = res.value;
+    } else if(STORAGE_BACKEND === "local"){
+      raw = localStorage.getItem(SEEN_SENTENCES_KEY);
+    } else if(_memoryStore[SEEN_SENTENCES_KEY]){
+      raw = _memoryStore[SEEN_SENTENCES_KEY];
+    }
+    if(raw) SEEN_SENTENCE_IDS = new Set(JSON.parse(raw));
+  }catch(e){ /* none yet */ }
+}
+let seenSentencesSaveTimer = null;
+async function saveSeenSentencesNow(){
+  const json = JSON.stringify(Array.from(SEEN_SENTENCE_IDS));
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(SEEN_SENTENCES_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(SEEN_SENTENCES_KEY, json);
+    else _memoryStore[SEEN_SENTENCES_KEY] = json;
+  }catch(e){ console.warn("Seen-sentences save failed", e); }
+}
+function markSentenceSeen(wordId){
+  if(!wordId || SEEN_SENTENCE_IDS.has(wordId)) return;
+  SEEN_SENTENCE_IDS.add(wordId);
+  clearTimeout(seenSentencesSaveTimer);
+  seenSentencesSaveTimer = setTimeout(saveSeenSentencesNow, 350);
+}
+function getSentenceCoverage(words){
+  const seen = words.filter(w=>SEEN_SENTENCE_IDS.has(w.id)).length;
+  return { seen, total: words.length };
+}
+// Picks a random sentence, but weights toward ones not seen yet — once every sentence in
+// the pool has been seen at least once, it falls back to a genuinely uniform random pick.
+function pickSentenceWeighted(pool){
+  const unseen = pool.filter(w=>!SEEN_SENTENCE_IDS.has(w.id));
+  const source = unseen.length > 0 ? unseen : pool;
+  return source[Math.floor(Math.random()*source.length)];
+}
+
 // Returns {demoted} — demoted=true when a mastered word was just missed and downgraded to "shaky"
-function markResult(word, correct){
+// verified=true means the correct answer was objectively checked by the system (multiple
+// choice selection, matching pairs, assembled sentence order) — verified=false means it's a
+// self-report (Flashcards' "Got it," clicked after already seeing the answer, with no way to
+// confirm the person actually knew it beforehand). A word can only be promoted to "mastered"
+// on a correct answer that was actually verified — self-reports alone build the streak but
+// can't complete it, so pure guessing/rubber-stamping on Flashcards can't fake mastery.
+function markResult(word, correct, verified){
   recordActivityToday();
   const id = word.id;
   let p = PROGRESS[id] || {status:"new", seen:0, correct:0, wrong:0, streak:0, lastSeen:null, masteredAt:null, popQuizPending:0};
@@ -2823,10 +2883,14 @@ function markResult(word, correct){
     p.streak++;
     if(p.status==="shaky"){
       p.popQuizPending = Math.max(0, p.popQuizPending-1);
-      if(p.popQuizPending===0){ p.status="mastered"; p.masteredAt=Date.now(); p.streak=0; }
+      if(p.popQuizPending===0 && verified){ p.status="mastered"; p.masteredAt=Date.now(); p.streak=0; }
     } else if(p.status!=="mastered"){
-      p.status = (p.streak>=MASTERY_STREAK) ? "mastered" : "learning";
-      if(p.status==="mastered") p.masteredAt = Date.now();
+      if(p.streak>=MASTERY_STREAK && verified){
+        p.status = "mastered";
+        p.masteredAt = Date.now();
+      } else {
+        p.status = "learning";
+      }
     }
   } else {
     p.wrong++;
@@ -4211,13 +4275,17 @@ function renderFlashcard(){
   document.getElementById("fcKnowBtn").addEventListener("click", (e)=>{
     e.stopPropagation();
     pushFcHistory(w);
-    markResult(w, true);
+    markResult(w, true, false);
+    const p = PROGRESS[w.id];
+    if(p.status==="learning" && p.streak>=MASTERY_STREAK){
+      showToast(`"${w.e}" — you've gotten this right ${p.streak} times in Flashcards, but it needs one correct answer in a Quiz to actually confirm mastery. Flashcards is self-reported, so it can't fully verify recall on its own.`);
+    }
     fcState.known++; fcState.i++; fcState.flipped = false; renderFlashcard();
   });
   document.getElementById("fcAgainBtn").addEventListener("click", (e)=>{
     e.stopPropagation();
     pushFcHistory(w);
-    const {demoted} = markResult(w, false);
+    const {demoted} = markResult(w, false, false);
     fcState.deck.push(w);
     if(demoted){
       fcState.deck.splice(Math.min(fcState.deck.length, fcState.i+3), 0, w);
@@ -4412,7 +4480,7 @@ function renderQuiz(){
       pushQzHistory(w);
       const correct = optText === correctText;
       if(correct) qzState.score++;
-      const {demoted} = markResult(w, correct);
+      const {demoted} = markResult(w, correct, true);
       if(demoted){
         qzState.deck.splice(Math.min(qzState.deck.length, qzState.i+2), 0, w);
         qzState.deck.splice(Math.min(qzState.deck.length, qzState.i+5), 0, w);
@@ -4524,12 +4592,18 @@ function renderSentencesCategoryPicker(catId){
   const grid = document.getElementById("sentSubGrid");
   cat.subs.forEach(sub=>{
     const status = getSentenceSubStatus(sub);
+    const cov = getSentenceCoverage(sub.words);
+    const covPct = cov.total>0 ? Math.round((cov.seen/cov.total)*100) : 0;
     const card = document.createElement("div");
     card.className="sub-card" + (status!=="none" ? " status-"+status : "");
     card.innerHTML = `
       ${statusBadgeHtml(status)}
       <span class="name-en">${sub.en}</span><span class="name-ar">${displayArName(sub)}</span>
       <div class="count">${sub.words.length} sentences</div>
+      <div class="coverage-row">
+        <div class="coverage-bar"><div class="coverage-fill" style="width:${covPct}%"></div></div>
+        <div class="coverage-label">${cov.seen}/${cov.total} seen</div>
+      </div>
       <div class="sub-actions">
         <button class="btn" data-act="list">📖 View List</button>
         <button class="btn primary" data-act="random">🎲 Random Practice</button>
@@ -4551,7 +4625,8 @@ function startSentencePractice(words, label, catId, subId){
   nextRandomSentence();
 }
 function nextRandomSentence(){
-  spState.current = spState.pool[Math.floor(Math.random()*spState.pool.length)];
+  spState.current = pickSentenceWeighted(spState.pool);
+  markSentenceSeen(spState.current.id);
   spState.revealed = false;
   renderSentencePractice();
 }
@@ -4600,7 +4675,8 @@ function startSentenceQuiz(words, label, catId, subId){
   nextSentenceQuizQuestion();
 }
 function nextSentenceQuizQuestion(){
-  sqState.current = sqState.pool[Math.floor(Math.random()*sqState.pool.length)];
+  sqState.current = pickSentenceWeighted(sqState.pool);
+  markSentenceSeen(sqState.current.id);
   const others = sqState.pool.filter(w=>w.x !== sqState.current.x);
   const distractors = shuffle(others).slice(0,3).map(w=>w.x);
   sqState.options = shuffle([sqState.current.x, ...distractors]);
@@ -5041,7 +5117,7 @@ function renderSentences(catId, subId){
     const sub = cat.subs.find(s=>s.id===subId);
     words = sub.words;
     label = sub.en;
-    crumbLabel = `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Sentences</span>`;
+    crumbLabel = `<a data-nav="sent-hub">Sentences</a> <span>›</span> <a data-nav="sent-cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — List</span>`;
     recordLastActivity("sentences", catId, subId);
     markSentenceSubVisited(subId);
   } else {
@@ -5061,12 +5137,10 @@ function renderSentences(catId, subId){
   `;
   document.getElementById("sentModeRandom").addEventListener("click", ()=>startSentencePractice(words, label, catId, subId));
   document.getElementById("sentModeQuiz").addEventListener("click", ()=>startSentenceQuiz(words, label, catId, subId));
-  const homeCrumb = main.querySelector('[data-nav="home"]');
-  if(homeCrumb) homeCrumb.addEventListener("click", ()=>setView("home"));
   const sentHubCrumb = main.querySelector('[data-nav="sent-hub"]');
   if(sentHubCrumb) sentHubCrumb.addEventListener("click", renderSentencesHub);
-  const catCrumb = main.querySelector('[data-nav="cat"]');
-  if(catCrumb) catCrumb.addEventListener("click", ()=>renderCategory(catCrumb.dataset.catid));
+  const sentCatCrumb = main.querySelector('[data-nav="sent-cat"]');
+  if(sentCatCrumb) sentCatCrumb.addEventListener("click", ()=>renderSentencesCategoryPicker(sentCatCrumb.dataset.catid));
 
   const list = document.getElementById("sentList");
   words.forEach((w,idx)=>{
@@ -5205,10 +5279,10 @@ function renderHistory(){
 
 function exportProgress(){
   const payload = {
-    app:"mufradat", formatVersion:3, exportedAt:new Date().toISOString(),
+    app:"mufradat", formatVersion:4, exportedAt:new Date().toISOString(),
     wordCount:Object.keys(PROGRESS).length, progress:PROGRESS,
     streak:STREAK, lastActivity:LAST_ACTIVITY, visitedSubs:Array.from(VISITED_SUBS),
-    visitedSentenceSubs:Array.from(VISITED_SENTENCE_SUBS)
+    visitedSentenceSubs:Array.from(VISITED_SENTENCE_SUBS), seenSentences:Array.from(SEEN_SENTENCE_IDS)
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -5250,6 +5324,10 @@ function importProgressFile(file){
         if(Array.isArray(payload.visitedSentenceSubs)){
           payload.visitedSentenceSubs.forEach(id=>VISITED_SENTENCE_SUBS.add(id));
           await saveVisitedSentenceSubsNow();
+        }
+        if(Array.isArray(payload.seenSentences)){
+          payload.seenSentences.forEach(id=>SEEN_SENTENCE_IDS.add(id));
+          await saveSeenSentencesNow();
         }
       }
       const importedCount = Object.keys(incoming).length;
@@ -5388,7 +5466,7 @@ function checkBuilder(){
     return;
   }
   builderState.attempts++;
-  markResult(builderState.currentWord, attemptStr===correctStr);
+  markResult(builderState.currentWord, attemptStr===correctStr, true);
   if(attemptStr === correctStr){
     fb.innerHTML = `<div class="builder-correct">✅ Correct!</div>`;
     setTimeout(nextBuilderSentence, 1400);
@@ -5477,6 +5555,7 @@ function render(){
   await loadLastActivity();
   await loadVisitedSubs();
   await loadVisitedSentenceSubs();
+  await loadSeenSentences();
   render();
   initTimerWidget();
   if(state.view === "home") setTimeout(showWelcomeBackPopup, 500);

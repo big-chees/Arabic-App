@@ -133,6 +133,13 @@
   }
   .due-today-title{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
   .due-today-sub{font-size:12px; color:var(--text-muted); margin-top:4px; max-width:480px;}
+  .continue-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    background:linear-gradient(135deg, rgba(47,166,160,0.12), rgba(201,162,75,0.08));
+    border:1px solid var(--teal); border-radius:8px; padding:18px 22px; margin:20px 0;
+  }
+  .continue-title{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
+  .continue-sub{font-size:12px; color:var(--text-muted); margin-top:4px;}
 
   /* ---------- roots ---------- */
   .root-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;}
@@ -172,6 +179,18 @@
   .cat-card .name-en{font-family:'Fraunces',serif; font-size:17px; font-weight:600; margin-top:2px;}
   .cat-card .count{font-size:12px; color:var(--text-muted); margin-top:8px;}
 
+  /* ---------- progress status highlighting (shared by cat-card and sub-card) ---------- */
+  .status-opened{border-color:var(--text-muted) !important;}
+  .status-progress{border-color:var(--gold) !important; box-shadow:0 0 0 1px rgba(201,162,75,0.25);}
+  .status-full{border-color:var(--good) !important; box-shadow:0 0 0 1px rgba(76,165,122,0.35);}
+  .status-badge{
+    position:absolute; top:10px; right:10px; font-size:10px; font-weight:700; letter-spacing:0.05em;
+    padding:3px 8px; border-radius:999px; text-transform:uppercase;
+  }
+  .status-badge.status-opened{background:rgba(147,164,188,0.18); color:var(--text-muted); border:none !important;}
+  .status-badge.status-progress{background:rgba(201,162,75,0.18); color:var(--gold-soft); border:none !important;}
+  .status-badge.status-full{background:rgba(76,165,122,0.18); color:var(--good); border:none !important;}
+
   .crumbs{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:22px; flex-wrap:wrap;}
   .crumbs a{color:var(--teal-soft); cursor:pointer; text-decoration:none;}
   .crumbs a:hover{text-decoration:underline;}
@@ -179,6 +198,7 @@
   .sub-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-bottom:10px;}
   .sub-card{
     background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px;
+    position:relative;
   }
   .sub-card .name-en{font-family:'Fraunces',serif; font-size:17px; font-weight:600;}
   .sub-card .name-ar{font-family:'Noto Naskh Arabic','Amiri',serif; color:var(--gold-soft); font-size:16px; margin-left:6px;}
@@ -650,6 +670,18 @@
     opacity:0; pointer-events:none; transition:all .3s ease; z-index:200;
   }
   .app-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .confirm-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:300;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .confirm-modal{
+    background:var(--panel-2); border:1px solid var(--gold); border-radius:12px; padding:24px;
+    max-width:400px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.5);
+  }
+  .confirm-message{font-size:14px; line-height:1.6; margin-bottom:20px;}
+  .confirm-actions{display:flex; gap:10px; justify-content:flex-end;}
+  .confirm-actions .btn{padding:10px 18px; font-size:13px;}
 
   /* ---------- history ---------- */
   .hist-row{
@@ -2384,26 +2416,44 @@ const HARAKAT = [
   {base:"ب", glyph:"بٌ", name:"Dammatain", desc:"Two dammas together at the end of a word — adds an \"un\" sound, marking indefinite nominative case in formal Arabic. بٌ = \"bun\".", noSpeak:true}
 ];
 
+let _currentUtterance = null; // Safari has a known bug where an utterance referenced only by
+// a local variable can get garbage-collected mid-speech and cut out — keeping a persistent
+// reference here prevents that.
 function speak(text){
   if(!("speechSynthesis" in window)){
     alert("Your browser doesn't support text-to-speech. Try Chrome, Edge, or Safari.");
     return;
   }
-  // iOS Safari (particularly iPhone) has a known bug: calling cancel() and speak()
-  // back-to-back in the same tick can silently drop the utterance — cancel() takes
-  // a moment to actually clear the queue. iPadOS tends to tolerate this; iPhone often
-  // doesn't. A short delay after cancel() and a resume() call are the standard fix.
+  // iOS Safari requires speak() to run synchronously inside the exact call stack of the
+  // user's tap — any delay (even a short setTimeout) can cause it to silently refuse to
+  // speak. Everything here runs synchronously, with no async gaps, in direct response to
+  // the click that called this function. resume() clears a "stuck paused" state iOS can
+  // get into after the tab is backgrounded.
   window.speechSynthesis.resume();
   if(window.speechSynthesis.speaking || window.speechSynthesis.pending){
     window.speechSynthesis.cancel();
   }
-  setTimeout(()=>{
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "ar-SA";
-    utter.rate = 0.75;
-    window.speechSynthesis.speak(utter);
-  }, 60);
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "ar-SA";
+  utter.rate = 0.75;
+  _currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
 }
+// iOS Safari's speech engine sometimes needs "unlocking" by the very first user gesture on
+// the page, the same way autoplay audio does. Fire a near-silent primer on the first tap
+// anywhere, so later real speak() calls are more likely to actually work.
+let _speechPrimed = false;
+function primeSpeechSynthesis(){
+  if(_speechPrimed || !("speechSynthesis" in window)) return;
+  _speechPrimed = true;
+  try{
+    const primer = new SpeechSynthesisUtterance(" ");
+    primer.volume = 0;
+    window.speechSynthesis.speak(primer);
+  }catch(e){ /* ignore — this is just a best-effort unlock */ }
+}
+document.addEventListener("touchstart", primeSpeechSynthesis, {once:true, passive:true});
+document.addEventListener("click", primeSpeechSynthesis, {once:true});
 
 /* ============================= HELPERS ============================= */
 let showTashkeel = false;
@@ -2543,6 +2593,118 @@ function recordActivityToday(){
   saveStreak();
 }
 
+/* ============================= CONTINUE WHERE YOU LEFT OFF ============================= */
+const LAST_ACTIVITY_KEY = "last-activity-v1";
+let LAST_ACTIVITY = null; // {mode, catId, subId, catEn, subEn, ts}
+const ACTIVITY_LABELS = {
+  flashcards:{icon:"🗂️", label:"Flashcards"}, quiz:{icon:"🎯", label:"Quiz"},
+  match:{icon:"🎮", label:"Match"}, tashkeel:{icon:"📍", label:"Tashkeel Challenge"},
+  mosaic:{icon:"🕌", label:"Mosaic Rush"}, sentences:{icon:"📖", label:"Sentences"}
+};
+async function loadLastActivity(){
+  try{
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(LAST_ACTIVITY_KEY, false);
+      if(res && res.value) LAST_ACTIVITY = JSON.parse(res.value);
+    } else if(STORAGE_BACKEND === "local"){
+      const raw = localStorage.getItem(LAST_ACTIVITY_KEY);
+      if(raw) LAST_ACTIVITY = JSON.parse(raw);
+    } else if(_memoryStore[LAST_ACTIVITY_KEY]){
+      LAST_ACTIVITY = JSON.parse(_memoryStore[LAST_ACTIVITY_KEY]);
+    }
+  }catch(e){ /* none yet */ }
+}
+async function saveLastActivityNow(){
+  const json = JSON.stringify(LAST_ACTIVITY);
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(LAST_ACTIVITY_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(LAST_ACTIVITY_KEY, json);
+    else _memoryStore[LAST_ACTIVITY_KEY] = json;
+  }catch(e){ console.warn("Last-activity save failed", e); }
+}
+// Called by every practice mode when it starts on a specific subcategory — records
+// enough to rebuild a "Continue where you left off" card on the home page later.
+function recordLastActivity(mode, catId, subId){
+  if(!catId || !subId) return; // only track subcategory-scoped sessions, not "all words" mixes
+  const cat = DATA.categories.find(c=>c.id===catId);
+  const sub = cat && cat.subs.find(s=>s.id===subId);
+  if(!cat || !sub) return;
+  LAST_ACTIVITY = { mode, catId, subId, catEn:cat.en, subEn:sub.en, ts:Date.now() };
+  saveLastActivityNow();
+  markSubVisited(subId);
+}
+function resumeLastActivity(){
+  if(!LAST_ACTIVITY) return;
+  const { mode, catId, subId } = LAST_ACTIVITY;
+  const cat = DATA.categories.find(c=>c.id===catId);
+  const sub = cat && cat.subs.find(s=>s.id===subId);
+  if(!cat || !sub){ showToast("That subcategory isn't available anymore."); return; }
+  if(mode==="flashcards") startFlashcards(catId, subId);
+  else if(mode==="quiz") startQuiz(catId, subId);
+  else if(mode==="match") startMatchingGame(sub.words, sub.en, catId, subId);
+  else if(mode==="tashkeel") startTashkeelChallenge(sub.words, sub.en, catId, subId);
+  else if(mode==="mosaic") startMosaicRush(sub.words, sub.en, catId, subId);
+  else if(mode==="sentences") renderSentences(catId, subId);
+  else renderCategory(catId);
+}
+
+/* ============================= PROGRESS STATUS HIGHLIGHTING ============================= */
+// Tracks which subcategories have been visited at all (even with zero mastery yet),
+// so category/subcategory cards can be visually marked: opened / started / half / full.
+const VISITED_KEY = "visited-subs-v1";
+let VISITED_SUBS = new Set();
+async function loadVisitedSubs(){
+  try{
+    let raw = null;
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(VISITED_KEY, false);
+      if(res && res.value) raw = res.value;
+    } else if(STORAGE_BACKEND === "local"){
+      raw = localStorage.getItem(VISITED_KEY);
+    } else if(_memoryStore[VISITED_KEY]){
+      raw = _memoryStore[VISITED_KEY];
+    }
+    if(raw) VISITED_SUBS = new Set(JSON.parse(raw));
+  }catch(e){ /* none yet */ }
+}
+async function saveVisitedSubsNow(){
+  const json = JSON.stringify(Array.from(VISITED_SUBS));
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(VISITED_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(VISITED_KEY, json);
+    else _memoryStore[VISITED_KEY] = json;
+  }catch(e){ console.warn("Visited-subs save failed", e); }
+}
+function markSubVisited(subId){
+  if(!subId || VISITED_SUBS.has(subId)) return;
+  VISITED_SUBS.add(subId);
+  saveVisitedSubsNow();
+}
+// Returns one of: 'none' | 'opened' | 'started' | 'half' | 'full'
+function getSubStatus(sub){
+  const total = sub.words.length;
+  if(total === 0) return "none";
+  const masteredCount = sub.words.filter(w=>PROGRESS[w.id]?.status==="mastered").length;
+  const startedCount = sub.words.filter(w=>PROGRESS[w.id]).length;
+  if(masteredCount === total) return "full";
+  if(startedCount > 0) return "progress";
+  if(VISITED_SUBS.has(sub.id)) return "opened";
+  return "none";
+}
+// Aggregates all of a category's subcategories into one overall status for the top-level grid.
+function getCatStatus(cat){
+  const statuses = cat.subs.map(getSubStatus);
+  if(statuses.every(s=>s==="full")) return "full";
+  if(statuses.some(s=>s==="full"||s==="progress")) return "progress";
+  if(statuses.some(s=>s==="opened")) return "opened";
+  return "none";
+}
+const STATUS_LABELS = { opened:"Opened", progress:"In Progress", full:"Mastered" };
+function statusBadgeHtml(status){
+  if(!STATUS_LABELS[status]) return "";
+  return `<span class="status-badge status-${status}">${STATUS_LABELS[status]}</span>`;
+}
+
 // Returns {demoted} — demoted=true when a mastered word was just missed and downgraded to "shaky"
 function markResult(word, correct){
   recordActivityToday();
@@ -2628,10 +2790,11 @@ function markSubcategoryAsKnown(sub){
   const alreadyMastered = sub.words.filter(w=>PROGRESS[w.id]?.status==="mastered").length;
   const toMark = sub.words.length - alreadyMastered;
   if(toMark === 0){ showToast(`Every word in "${sub.en}" is already marked mastered.`); return; }
-  if(!confirm(`Mark all ${sub.words.length} words in "${sub.en}" as already known? This skips practice and marks them mastered immediately — you can always demote one later by getting it wrong in a quiz or flashcard session.`)) return;
-  sub.words.forEach(w=>markWordAsKnown(w));
-  showToast(`Marked ${toMark} word${toMark===1?"":"s"} in "${sub.en}" as known.`);
-  activeRerender();
+  showConfirm(`Mark all ${sub.words.length} words in "${sub.en}" as already known? This skips practice and marks them mastered immediately — you can always demote one later by getting it wrong in a quiz or flashcard session.`, ()=>{
+    sub.words.forEach(w=>markWordAsKnown(w));
+    showToast(`Marked ${toMark} word${toMark===1?"":"s"} in "${sub.en}" as known.`);
+    activeRerender();
+  });
 }
 
 // Marks any shaky words already in the deck, and randomly injects a couple more from elsewhere
@@ -2659,6 +2822,32 @@ function showToast(msg){
   t.classList.add("show");
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(()=>t.classList.remove("show"), 4500);
+}
+
+// Native window.confirm() is unreliable inside iOS home-screen PWAs (standalone mode) —
+// it can silently fail to appear or get auto-dismissed without the person seeing anything,
+// which makes buttons that depend on it look completely broken. This is an in-app
+// replacement that renders its own modal and works consistently everywhere.
+function showConfirm(message, onConfirm){
+  const existing = document.getElementById("confirmOverlay");
+  if(existing) existing.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "confirmOverlay";
+  overlay.className = "confirm-overlay";
+  overlay.innerHTML = `
+    <div class="confirm-modal">
+      <div class="confirm-message">${message}</div>
+      <div class="confirm-actions">
+        <button class="btn" id="confirmCancelBtn">Cancel</button>
+        <button class="btn primary" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const cleanup = ()=>overlay.remove();
+  document.getElementById("confirmCancelBtn").addEventListener("click", cleanup);
+  document.getElementById("confirmOkBtn").addEventListener("click", ()=>{ cleanup(); onConfirm(); });
+  overlay.addEventListener("click", (e)=>{ if(e.target===overlay) cleanup(); });
 }
 
 /* ============================= PRACTICE TIMER ============================= */
@@ -2914,6 +3103,7 @@ function renderHome(){
       </div>
       ${STREAK.longest>0 ? `<div class="streak-sub">Longest streak: ${STREAK.longest} day${STREAK.longest===1?"":"s"} · ${STREAK.totalDaysActive||0} total days practiced</div>` : ""}
     </div>
+    <div id="continueWrap"></div>
     <div id="dueTodayWrap"></div>
     <div class="section-label">Choose a difficulty</div>
     <div class="diff-bar" id="diffBar"></div>
@@ -2927,8 +3117,29 @@ function renderHome(){
   renderQuickActions();
   renderCatGrid();
   renderProgressBar();
+  renderContinueCard();
   renderDueToday();
   startHeroFlash();
+}
+
+function renderContinueCard(){
+  const wrap = document.getElementById("continueWrap");
+  if(!wrap) return;
+  if(!LAST_ACTIVITY){ wrap.innerHTML = ""; return; }
+  const cat = DATA.categories.find(c=>c.id===LAST_ACTIVITY.catId);
+  const sub = cat && cat.subs.find(s=>s.id===LAST_ACTIVITY.subId);
+  if(!cat || !sub){ wrap.innerHTML = ""; return; }
+  const meta = ACTIVITY_LABELS[LAST_ACTIVITY.mode] || {icon:"📍", label:"Practice"};
+  wrap.innerHTML = `
+    <div class="continue-banner">
+      <div>
+        <div class="continue-title">${meta.icon} Continue where you left off</div>
+        <div class="continue-sub">${meta.label} — ${cat.en} — ${sub.en}</div>
+      </div>
+      <button class="btn primary" id="continueBtn">Resume →</button>
+    </div>
+  `;
+  document.getElementById("continueBtn").addEventListener("click", resumeLastActivity);
 }
 
 function renderDueToday(){
@@ -3026,9 +3237,11 @@ function renderCatGrid(){
   grid.innerHTML = "";
   cats.forEach(c=>{
     const count = c.subs.reduce((s,sub)=>s+sub.words.length,0);
+    const status = getCatStatus(c);
     const card = document.createElement("div");
-    card.className="cat-card";
+    card.className="cat-card" + (status!=="none" ? " status-"+status : "");
     card.innerHTML = `
+      ${statusBadgeHtml(status)}
       <span class="icon">${c.icon}</span>
       <span class="name-ar">${displayArName(c)}</span>
       <span class="name-en">${c.en}</span>
@@ -3526,9 +3739,11 @@ function renderCategory(catId){
   main.querySelector('[data-nav="home"]').addEventListener("click", ()=>setView("home"));
   const grid = document.getElementById("subGrid");
   cat.subs.forEach(sub=>{
+    const status = getSubStatus(sub);
     const card = document.createElement("div");
-    card.className="sub-card";
+    card.className="sub-card" + (status!=="none" ? " status-"+status : "");
     card.innerHTML = `
+      ${statusBadgeHtml(status)}
       <span class="name-en">${sub.en}</span><span class="name-ar">${displayArName(sub)}</span>
       <div class="count">${sub.words.length} words</div>
       <div class="sub-actions">
@@ -3565,6 +3780,7 @@ function startFlashcards(catId, subId){
   const sub = cat.subs.find(s=>s.id===subId);
   const deck = annotateAndInjectPopQuizzes(shuffle(sub.words));
   fcState = { cat, sub, label: sub.en, sourceWords: sub.words, deck, total: deck.length, i:0, known:0, history:[], flipped:false };
+  recordLastActivity("flashcards", catId, subId);
   renderFlashcard();
 }
 function startFlashcardsSession(words, label){
@@ -3750,6 +3966,7 @@ function startQuiz(catId, subId){
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
   qzState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
+  recordLastActivity("quiz", catId, subId);
   startQuizStopwatch();
   renderQuiz();
 }
@@ -3972,9 +4189,11 @@ function renderSentencesHub(){
   const grid = document.getElementById("sentCatGrid");
   DATA.categories.forEach(c=>{
     const count = c.subs.reduce((s,sub)=>s+sub.words.length,0);
+    const status = getCatStatus(c);
     const card = document.createElement("div");
-    card.className="cat-card";
+    card.className="cat-card" + (status!=="none" ? " status-"+status : "");
     card.innerHTML = `
+      ${statusBadgeHtml(status)}
       <span class="icon">${c.icon}</span>
       <span class="name-ar">${displayArName(c)}</span>
       <span class="name-en">${c.en}</span>
@@ -4123,6 +4342,7 @@ function startMatchingGame(words, label, catId, subId){
     selected: [], matchedIds: new Set(), wrongFlashIds: new Set(),
     startTime: Date.now(), elapsed: 0, done: false, mistakes: 0
   };
+  recordLastActivity("match", catId, subId);
   startMatchStopwatch();
   renderMatchingGame();
 }
@@ -4279,6 +4499,7 @@ function startTashkeelChallenge(words, label, catId, subId){
     return;
   }
   tcState = { pool, label, catId, subId, score:0, asked:0, current:null, options:null, answered:false };
+  recordLastActivity("tashkeel", catId, subId);
   startQuizStopwatch();
   nextTashkeelQuestion();
 }
@@ -4365,6 +4586,7 @@ function startMosaicRush(words, label, catId, subId){
     pool: words, label, catId, subId, score:0, lives:3, timeLeft:MOSAIC_TIME,
     current:null, options:null, answered:false, done:false, tilesFilled:0
   };
+  recordLastActivity("mosaic", catId, subId);
   clearInterval(mrTimerInterval);
   mrTimerInterval = setInterval(()=>{
     if(mrState.done) return;
@@ -4480,6 +4702,7 @@ function renderSentences(catId, subId){
     words = sub.words;
     label = sub.en;
     crumbLabel = `<a data-nav="home">Categories</a> <span>›</span> <a data-nav="cat" data-catid="${cat.id}">${cat.en}</a> <span>›</span> <span>${sub.en} — Sentences</span>`;
+    recordLastActivity("sentences", catId, subId);
   } else {
     words = allWords();
     label = "All Sentences";
@@ -4630,17 +4853,21 @@ function renderHistory(){
   drawFilterBar();
   drawList();
   const resetBtn = document.getElementById("resetProgressBtn");
-  if(resetBtn) resetBtn.addEventListener("click", async ()=>{
-    if(confirm("Reset all your practice progress? This can't be undone.")){
+  if(resetBtn) resetBtn.addEventListener("click", ()=>{
+    showConfirm("Reset all your practice progress? This can't be undone.", async ()=>{
       PROGRESS = {};
       await saveProgressNow();
       renderHistory();
-    }
+    });
   });
 }
 
 function exportProgress(){
-  const payload = { app:"mufradat", formatVersion:1, exportedAt:new Date().toISOString(), wordCount:Object.keys(PROGRESS).length, progress:PROGRESS };
+  const payload = {
+    app:"mufradat", formatVersion:2, exportedAt:new Date().toISOString(),
+    wordCount:Object.keys(PROGRESS).length, progress:PROGRESS,
+    streak:STREAK, lastActivity:LAST_ACTIVITY, visitedSubs:Array.from(VISITED_SUBS)
+  };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -4660,9 +4887,25 @@ function importProgressFile(file){
       const payload = JSON.parse(e.target.result);
       const incoming = (payload && typeof payload==="object" && payload.progress) ? payload.progress : payload;
       if(!incoming || typeof incoming !== "object" || Array.isArray(incoming)) throw new Error("bad format");
-      const beforeCount = Object.keys(PROGRESS).length;
       PROGRESS = {...PROGRESS, ...incoming};
       await saveProgressNow();
+      // Newer exports (formatVersion 2+) also carry streak, last-activity, and visited-subcategory
+      // data — restore those too so "Continue where you left off" and the progress highlighting
+      // on category/subcategory cards come back correctly after an import, not just word mastery.
+      if(payload && typeof payload==="object"){
+        if(payload.streak && typeof payload.streak==="object"){
+          STREAK = payload.streak;
+          await saveStreakNow();
+        }
+        if(payload.lastActivity && typeof payload.lastActivity==="object"){
+          LAST_ACTIVITY = payload.lastActivity;
+          await saveLastActivityNow();
+        }
+        if(Array.isArray(payload.visitedSubs)){
+          payload.visitedSubs.forEach(id=>VISITED_SUBS.add(id));
+          await saveVisitedSubsNow();
+        }
+      }
       const importedCount = Object.keys(incoming).length;
       showToast(`Imported ${importedCount} words' progress (you now have ${Object.keys(PROGRESS).length} tracked total).`);
       renderHistory();
@@ -4884,6 +5127,8 @@ function render(){
   buildWordsById();
   await loadProgress();
   await loadStreak();
+  await loadLastActivity();
+  await loadVisitedSubs();
   render();
   initTimerWidget();
   // Service worker: only registers over HTTPS/localhost (browsers block it on file:// pages).

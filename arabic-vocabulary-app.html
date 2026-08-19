@@ -3337,6 +3337,11 @@ function renderContinueCard(){
 // continue-banner on the home page itself.
 function showWelcomeBackPopup(){
   if(!LAST_ACTIVITY) return;
+  // Only show this if the person has actually practiced at least one word — LAST_ACTIVITY
+  // gets set the instant a subcategory action is clicked, even if no card/question was ever
+  // answered, so a brand-new visitor who just glanced at a subcategory shouldn't get a
+  // "welcome back, continue where you left off" prompt with nothing real to continue.
+  if(Object.keys(PROGRESS).length === 0) return;
   const cat = DATA.categories.find(c=>c.id===LAST_ACTIVITY.catId);
   const sub = cat && cat.subs.find(s=>s.id===LAST_ACTIVITY.subId);
   if(!cat || !sub) return;

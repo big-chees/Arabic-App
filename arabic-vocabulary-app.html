@@ -152,6 +152,14 @@
   }
   .continue-title{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
   .continue-sub{font-size:12px; color:var(--text-muted); margin-top:4px;}
+  .checkpoint-banner{
+    display:flex; align-items:center; gap:16px;
+    background:linear-gradient(135deg, rgba(201,162,75,0.16), rgba(193,85,74,0.08));
+    border:1px solid var(--gold); border-radius:8px; padding:18px 22px; margin-bottom:24px;
+  }
+  .checkpoint-banner-icon{font-size:26px; flex-shrink:0;}
+  .checkpoint-banner-title{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
+  .checkpoint-banner-sub{font-size:12.5px; color:var(--text-muted); margin-top:4px; line-height:1.5;}
 
   /* ---------- roots ---------- */
   .root-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;}
@@ -2771,6 +2779,146 @@ function statusBadgeHtml(status){
   return `<span class="status-badge status-${status}">${STATUS_LABELS[status]}</span>`;
 }
 
+/* ============================= MASTERY CHECKPOINT ============================= */
+// Every 3 words that get promoted to "mastered" (vocab/Categories only — sentences have no
+// mastery concept), the app requires a short verified review of exactly those 3 words before
+// any further new practice can start. This exists specifically to catch the case the person
+// asked about directly: someone rubber-stamping "Got it" on Flashcards without really
+// retaining anything. Since only verified promotions reach "mastered" at all (see markResult),
+// this checkpoint is really testing "does it hold up a second time," not first-time luck.
+const CHECKPOINT_EVERY = 3;
+const CHECKPOINT_KEY = "mastery-checkpoint-v1";
+let pendingReviewWordIds = [];
+let checkpointState = null;
+async function loadCheckpointState(){
+  try{
+    let raw = null;
+    if(STORAGE_BACKEND === "claude"){
+      const res = await window.storage.get(CHECKPOINT_KEY, false);
+      if(res && res.value) raw = res.value;
+    } else if(STORAGE_BACKEND === "local"){
+      raw = localStorage.getItem(CHECKPOINT_KEY);
+    } else if(_memoryStore[CHECKPOINT_KEY]){
+      raw = _memoryStore[CHECKPOINT_KEY];
+    }
+    if(raw) pendingReviewWordIds = JSON.parse(raw);
+  }catch(e){ /* none yet */ }
+}
+async function saveCheckpointStateNow(){
+  const json = JSON.stringify(pendingReviewWordIds);
+  try{
+    if(STORAGE_BACKEND === "claude") await window.storage.set(CHECKPOINT_KEY, json, false);
+    else if(STORAGE_BACKEND === "local") localStorage.setItem(CHECKPOINT_KEY, json);
+    else _memoryStore[CHECKPOINT_KEY] = json;
+  }catch(e){ console.warn("Checkpoint state save failed", e); }
+}
+function trackMasteryForCheckpoint(word){
+  if(!pendingReviewWordIds.includes(word.id)){
+    pendingReviewWordIds.push(word.id);
+    saveCheckpointStateNow();
+  }
+}
+// Returns true (and redirects into the checkpoint) if practice should be blocked right now.
+// Call this at the top of every function that starts a new vocab practice session.
+function checkpointGate(){
+  if(pendingReviewWordIds.length >= CHECKPOINT_EVERY){
+    startMasteryCheckpoint();
+    return true;
+  }
+  return false;
+}
+function startMasteryCheckpoint(){
+  const words = pendingReviewWordIds.map(id=>WORDS_BY_ID[id]).filter(Boolean);
+  if(words.length === 0){ pendingReviewWordIds = []; saveCheckpointStateNow(); return; }
+  checkpointState = { words, i:0, score:0, answered:false, options:null, direction:null };
+  nextCheckpointQuestion();
+}
+function nextCheckpointQuestion(){
+  const w = checkpointState.words[checkpointState.i];
+  checkpointState.direction = Math.random()<0.5 ? "ar2en" : "en2ar";
+  checkpointState.options = checkpointState.direction==="ar2en"
+    ? buildOptions(w, allWords())
+    : buildOptionsReverse(w, allWords());
+  checkpointState.answered = false;
+  renderMasteryCheckpoint();
+}
+function renderMasteryCheckpoint(){
+  activeRerender = renderMasteryCheckpoint;
+  const w = checkpointState.words[checkpointState.i];
+  const isAr2En = checkpointState.direction === "ar2en";
+  main.innerHTML = `
+    <div class="checkpoint-banner">
+      <div class="checkpoint-banner-icon">🔒</div>
+      <div>
+        <div class="checkpoint-banner-title">Quick mastery check</div>
+        <div class="checkpoint-banner-sub">You've mastered ${CHECKPOINT_EVERY} more words — confirm you've actually got them before continuing. Word ${checkpointState.i+1} of ${checkpointState.words.length}.</div>
+      </div>
+    </div>
+    <div class="quiz-wrap">
+      <div class="quiz-score" style="margin-bottom:14px;">Score ${checkpointState.score} / ${checkpointState.i}</div>
+      ${isAr2En
+        ? `<div class="quiz-word">${displayWord(w)}<button class="speak-btn quiz-speak-btn" id="ckSpeakBtn" title="Listen">🔊</button></div>
+           <div class="quiz-direction-label" style="text-align:center;">What does this mean?</div>`
+        : `<div class="quiz-word quiz-word-en">${w.e}</div>
+           <div class="quiz-direction-label" style="text-align:center;">Choose the Arabic word:</div>`
+      }
+      <div class="quiz-options" id="ckOptions"></div>
+      <div class="quiz-next" id="ckNextWrap" style="display:none; text-align:center;"><button class="btn primary" id="ckNext">Next →</button></div>
+    </div>
+  `;
+  const speakBtn = document.getElementById("ckSpeakBtn");
+  if(speakBtn) speakBtn.addEventListener("click", ()=>speak(w.tk||w.a));
+  const correctText = isAr2En ? w.e : displayWord(w);
+  const optWrap = document.getElementById("ckOptions");
+  checkpointState.options.forEach(optText=>{
+    const btn = document.createElement("div");
+    btn.className = isAr2En ? "quiz-opt" : "quiz-opt quiz-opt-ar";
+    btn.textContent = optText;
+    btn.addEventListener("click", ()=>{
+      if(checkpointState.answered) return;
+      checkpointState.answered = true;
+      const correct = optText === correctText;
+      if(correct) checkpointState.score++;
+      markResult(w, correct, true);
+      document.querySelectorAll("#ckOptions .quiz-opt").forEach(o=>{
+        o.classList.add("disabled");
+        if(o.textContent === correctText) o.classList.add("correct");
+        else if(o.textContent === optText) o.classList.add("wrong");
+      });
+      document.getElementById("ckNextWrap").style.display = "block";
+      document.getElementById("ckNext").textContent = (checkpointState.i+1 < checkpointState.words.length) ? "Next →" : "Finish →";
+    });
+    optWrap.appendChild(btn);
+  });
+  document.getElementById("ckNext").addEventListener("click", ()=>{
+    checkpointState.i++;
+    if(checkpointState.i >= checkpointState.words.length){
+      finishMasteryCheckpoint();
+    } else {
+      nextCheckpointQuestion();
+    }
+  });
+}
+function finishMasteryCheckpoint(){
+  const finalScore = checkpointState.score;
+  const total = checkpointState.words.length;
+  pendingReviewWordIds = [];
+  saveCheckpointStateNow();
+  main.innerHTML = `
+    <div class="quiz-wrap">
+      <div class="fc-done">
+        <div style="font-size:44px;">${finalScore===total ? "🏆" : "✅"}</div>
+        <div class="big">Checkpoint complete — ${finalScore}/${total}</div>
+        <p style="color:var(--text-muted);">${finalScore===total ? "All confirmed — you're clear to keep going." : "Any you missed just dropped back to \"shaky\" and will resurface naturally in future practice — that's the system working correctly, not a punishment."}</p>
+        <div class="fc-controls" style="margin-top:20px;">
+          <button class="btn primary" id="ckBackHome">Continue →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("ckBackHome").addEventListener("click", ()=>setView("home"));
+}
+
 // Sentence practice (Random Practice / Meaning Quiz / viewing the list) is a genuinely
 // different activity from vocab drilling, and uses the same underlying words — so it must
 // NOT reuse getSubStatus/getCatStatus above, or a subcategory mastered purely through
@@ -2883,11 +3031,12 @@ function markResult(word, correct, verified){
     p.streak++;
     if(p.status==="shaky"){
       p.popQuizPending = Math.max(0, p.popQuizPending-1);
-      if(p.popQuizPending===0 && verified){ p.status="mastered"; p.masteredAt=Date.now(); p.streak=0; }
+      if(p.popQuizPending===0 && verified){ p.status="mastered"; p.masteredAt=Date.now(); p.streak=0; trackMasteryForCheckpoint(word); }
     } else if(p.status!=="mastered"){
       if(p.streak>=MASTERY_STREAK && verified){
         p.status = "mastered";
         p.masteredAt = Date.now();
+        trackMasteryForCheckpoint(word);
       } else {
         p.status = "learning";
       }
@@ -4144,6 +4293,7 @@ function renderCategory(catId){
 let fcState = {};
 
 function startFlashcards(catId, subId){
+  if(checkpointGate()) return;
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
   const deck = annotateAndInjectPopQuizzes(shuffle(sub.words));
@@ -4152,6 +4302,7 @@ function startFlashcards(catId, subId){
   renderFlashcard();
 }
 function startFlashcardsSession(words, label){
+  if(checkpointGate()) return;
   const deck = annotateAndInjectPopQuizzes(shuffle(words));
   fcState = { cat:null, sub:null, label, sourceWords: words, deck, total: deck.length, i:0, known:0, history:[], flipped:false };
   renderFlashcard();
@@ -4335,6 +4486,7 @@ function updateQuizStopwatchDisplay(){
 }
 
 function startQuiz(catId, subId){
+  if(checkpointGate()) return;
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
   qzState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
@@ -4343,6 +4495,7 @@ function startQuiz(catId, subId){
   renderQuiz();
 }
 function startQuizSession(words, label){
+  if(checkpointGate()) return;
   qzState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
   startQuizStopwatch();
   renderQuiz();
@@ -4751,6 +4904,7 @@ let matchTimerInterval = null;
 const MATCH_PAIR_COUNT = 8;
 
 function startMatchingGame(words, label, catId, subId){
+  if(checkpointGate()) return;
   const pairCount = Math.min(MATCH_PAIR_COUNT, words.length);
   const chosen = shuffle(words).slice(0, pairCount);
   const tiles = [];
@@ -4914,6 +5068,7 @@ function generateWrongTashkeelOptions(tk, count){
 }
 
 function startTashkeelChallenge(words, label, catId, subId){
+  if(checkpointGate()) return;
   const pool = words.filter(w=>w.tk);
   if(pool.length < 4){
     showToast("Not enough tashkeel-marked words in this set yet for a challenge round.");
@@ -5003,6 +5158,7 @@ const MOSAIC_SIZE = 20; // tiles to complete
 const MOSAIC_TIME = 60; // seconds
 
 function startMosaicRush(words, label, catId, subId){
+  if(checkpointGate()) return;
   mrState = {
     pool: words, label, catId, subId, score:0, lives:3, timeLeft:MOSAIC_TIME,
     current:null, options:null, answered:false, done:false, tilesFilled:0
@@ -5284,10 +5440,11 @@ function renderHistory(){
 
 function exportProgress(){
   const payload = {
-    app:"mufradat", formatVersion:4, exportedAt:new Date().toISOString(),
+    app:"mufradat", formatVersion:5, exportedAt:new Date().toISOString(),
     wordCount:Object.keys(PROGRESS).length, progress:PROGRESS,
     streak:STREAK, lastActivity:LAST_ACTIVITY, visitedSubs:Array.from(VISITED_SUBS),
-    visitedSentenceSubs:Array.from(VISITED_SENTENCE_SUBS), seenSentences:Array.from(SEEN_SENTENCE_IDS)
+    visitedSentenceSubs:Array.from(VISITED_SENTENCE_SUBS), seenSentences:Array.from(SEEN_SENTENCE_IDS),
+    pendingReviewWordIds:pendingReviewWordIds
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -5333,6 +5490,10 @@ function importProgressFile(file){
         if(Array.isArray(payload.seenSentences)){
           payload.seenSentences.forEach(id=>SEEN_SENTENCE_IDS.add(id));
           await saveSeenSentencesNow();
+        }
+        if(Array.isArray(payload.pendingReviewWordIds)){
+          payload.pendingReviewWordIds.forEach(id=>{ if(!pendingReviewWordIds.includes(id)) pendingReviewWordIds.push(id); });
+          await saveCheckpointStateNow();
         }
       }
       const importedCount = Object.keys(incoming).length;
@@ -5561,6 +5722,7 @@ function render(){
   await loadVisitedSubs();
   await loadVisitedSentenceSubs();
   await loadSeenSentences();
+  await loadCheckpointState();
   render();
   initTimerWidget();
   if(state.view === "home") setTimeout(showWelcomeBackPopup, 500);

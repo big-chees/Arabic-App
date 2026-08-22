@@ -2872,14 +2872,19 @@ function scanForNewlyMasteredCategories(){
   if(changed) saveCheckpointStateNow();
 }
 // Returns true (and redirects into the checkpoint) if practice should be blocked right now.
-// Call this at the top of every function that starts a new vocab practice session.
+// Call this at the top of every function that starts a new vocab practice session, passing
+// a zero-arg callback that re-attempts that exact same call. If blocked, that callback is
+// stashed and fired automatically once the checkpoint is completed, so finishing the review
+// drops the person back into whatever they were actually trying to start — not back to Home.
 // This deliberately does NOT re-scan here — scanForNewlyMasteredCategories() already runs
 // immediately whenever a word is actually promoted (markResult, markWordAsKnown) and once on
 // app load, so pendingReviewCategoryIds is always already current by the time this checks it.
 // Scanning again here would mean re-walking every category/subcategory/word on every single
 // click into Flashcards/Quiz/etc. — pure wasted work that was making practice feel sluggish.
-function checkpointGate(){
+let checkpointResumeAction = null;
+function checkpointGate(resumeFn){
   if(pendingReviewCategoryIds.length >= CHECKPOINT_EVERY){
+    checkpointResumeAction = resumeFn || null;
     startMasteryCheckpoint();
     return true;
   }
@@ -2971,6 +2976,7 @@ function finishMasteryCheckpoint(){
   // remainder stays queued and will trigger its own checkpoint once it reaches 3 again.
   pendingReviewCategoryIds = pendingReviewCategoryIds.filter(id=>!checkpointState.catIds.includes(id));
   saveCheckpointStateNow();
+  const hasResume = typeof checkpointResumeAction === "function";
   main.innerHTML = `
     <div class="quiz-wrap">
       <div class="fc-done">
@@ -2978,12 +2984,20 @@ function finishMasteryCheckpoint(){
         <div class="big">Checkpoint complete — ${finalScore}/${total}</div>
         <p style="color:var(--text-muted);">${finalScore===total ? "All confirmed — you're clear to keep going." : "Any you missed just dropped back to \"shaky\" and will resurface naturally in future practice — that's the system working correctly, not a punishment."}</p>
         <div class="fc-controls" style="margin-top:20px;">
-          <button class="btn primary" id="ckBackHome">Continue →</button>
+          <button class="btn primary" id="ckBackHome">${hasResume ? "Continue where you left off →" : "Continue →"}</button>
         </div>
       </div>
     </div>
   `;
-  document.getElementById("ckBackHome").addEventListener("click", ()=>setView("home"));
+  document.getElementById("ckBackHome").addEventListener("click", ()=>{
+    const resume = checkpointResumeAction;
+    checkpointResumeAction = null;
+    // If more categories were already queued beyond these 3, calling the resume action will
+    // immediately hit checkpointGate() again on its own and correctly chain into the next
+    // review — no special handling needed here for that case.
+    if(resume) resume();
+    else setView("home");
+  });
 }
 
 // Sentence practice (Random Practice / Meaning Quiz / viewing the list) is a genuinely
@@ -4367,7 +4381,7 @@ function renderCategory(catId){
 let fcState = {};
 
 function startFlashcards(catId, subId){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startFlashcards(catId, subId))) return;
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
   const deck = annotateAndInjectPopQuizzes(shuffle(sub.words));
@@ -4376,7 +4390,7 @@ function startFlashcards(catId, subId){
   renderFlashcard();
 }
 function startFlashcardsSession(words, label){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startFlashcardsSession(words, label))) return;
   const deck = annotateAndInjectPopQuizzes(shuffle(words));
   fcState = { cat:null, sub:null, label, sourceWords: words, deck, total: deck.length, i:0, known:0, history:[], flipped:false };
   renderFlashcard();
@@ -4561,7 +4575,7 @@ function updateQuizStopwatchDisplay(){
 }
 
 function startQuiz(catId, subId){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startQuiz(catId, subId))) return;
   const cat = DATA.categories.find(c=>c.id===catId);
   const sub = cat.subs.find(s=>s.id===subId);
   qzState = { cat, sub, label: sub.en, sourceWords: sub.words, deck: annotateAndInjectPopQuizzes(shuffle(sub.words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
@@ -4570,7 +4584,7 @@ function startQuiz(catId, subId){
   renderQuiz();
 }
 function startQuizSession(words, label){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startQuizSession(words, label))) return;
   qzState = { cat:null, sub:null, label, sourceWords: words, deck: annotateAndInjectPopQuizzes(shuffle(words)), i:0, score:0, answered:false, history:[], currentIndex:-1 };
   startQuizStopwatch();
   renderQuiz();
@@ -4979,7 +4993,7 @@ let matchTimerInterval = null;
 const MATCH_PAIR_COUNT = 8;
 
 function startMatchingGame(words, label, catId, subId){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startMatchingGame(words, label, catId, subId))) return;
   const pairCount = Math.min(MATCH_PAIR_COUNT, words.length);
   const chosen = shuffle(words).slice(0, pairCount);
   const tiles = [];
@@ -5143,7 +5157,7 @@ function generateWrongTashkeelOptions(tk, count){
 }
 
 function startTashkeelChallenge(words, label, catId, subId){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startTashkeelChallenge(words, label, catId, subId))) return;
   const pool = words.filter(w=>w.tk);
   if(pool.length < 4){
     showToast("Not enough tashkeel-marked words in this set yet for a challenge round.");
@@ -5233,7 +5247,7 @@ const MOSAIC_SIZE = 20; // tiles to complete
 const MOSAIC_TIME = 60; // seconds
 
 function startMosaicRush(words, label, catId, subId){
-  if(checkpointGate()) return;
+  if(checkpointGate(()=>startMosaicRush(words, label, catId, subId))) return;
   mrState = {
     pool: words, label, catId, subId, score:0, lives:3, timeLeft:MOSAIC_TIME,
     current:null, options:null, answered:false, done:false, tilesFilled:0

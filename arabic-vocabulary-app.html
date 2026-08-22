@@ -1290,6 +1290,7 @@ const DATA = {
         {a:"لي", t:"li", tk:"لِي", e:"for me / mine (alternate \"to have\")", p:"phrase", s:"هٰذَا الْكِتَابُ لِي.", x:"This book is mine."},
         {a:"ليس عندي", t:"laysa indi", tk:"لَيْسَ عِنْدِي", e:"I don't have", p:"phrase", s:"لَيْسَ عِنْدِي نُقُودٌ الْآنَ.", x:"I don't have money right now."},
         {a:"هناك", t:"hunaka", tk:"هُنَاكَ", e:"there is / there are; over there", p:"phrase", s:"هُنَاكَ مَطْعَمٌ جَدِيدٌ فِي الْحَيِّ.", x:"There's a new restaurant in the neighborhood."},
+        {a:"هنا", t:"huna", tk:"هُنَا", e:"here", p:"adv", s:"أَنَا هُنَا مُنْذُ السَّاعَةِ الْعَاشِرَةِ.", x:"I've been here since ten o'clock."},
         {a:"يوجد", t:"yujad", tk:"يُوجَدُ", e:"there exists / there is (formal)", p:"v", s:"يُوجَدُ حَلٌّ لِهٰذِهِ الْمُشْكِلَةِ.", x:"There is a solution to this problem."}
       ]}
     ]},
@@ -1303,6 +1304,7 @@ const DATA = {
         {a:"هي", t:"hiya", tk:"هِيَ", e:"she / it", p:"pron", s:"هي طبيبة ماهرة.", x:"She is a skilled doctor."},
         {a:"نحن", t:"nahnu", tk:"نَحْنُ", e:"we", p:"pron", s:"نحن أصدقاء منذ زمن.", x:"We have been friends for a long time."},
         {a:"أنتم", t:"antum", tk:"أَنْتُمْ", e:"you (pl.)", p:"pron", s:"أنتم مدعوون إلى الحفلة.", x:"You all are invited to the party."},
+        {a:"أنتنّ", t:"antunna", tk:"أَنْتُنَّ", e:"you (f. pl.)", p:"pron", s:"أَنْتُنَّ صَدِيقَاتٌ رَائِعَاتٌ.", x:"You all (f.) are wonderful friends."},
         {a:"هم", t:"hum", tk:"هُمْ", e:"they (m.)", p:"pron", s:"هم يعملون في البنك.", x:"They work at the bank."},
         {a:"هن", t:"hunna", tk:"هُنَّ", e:"they (f.)", p:"pron", s:"هن يدرسن في الجامعة.", x:"They (f.) study at the university."},
         {a:"هذا", t:"hadha", tk:"هٰذَا", e:"this (m.)", p:"pron", s:"هذا بيتي الجديد.", x:"This is my new house."},
@@ -2493,6 +2495,17 @@ const HARAKAT = [
 let _currentUtterance = null; // Safari has a known bug where an utterance referenced only by
 // a local variable can get garbage-collected mid-speech and cut out — keeping a persistent
 // reference here prevents that.
+let _cachedVoices = [];
+let _voicesLoaded = false;
+function refreshVoiceCache(){
+  if(!("speechSynthesis" in window)) return;
+  const v = window.speechSynthesis.getVoices();
+  if(v && v.length){ _cachedVoices = v; _voicesLoaded = true; }
+}
+if("speechSynthesis" in window){
+  refreshVoiceCache();
+  window.speechSynthesis.addEventListener("voiceschanged", refreshVoiceCache);
+}
 function speak(text){
   if(!("speechSynthesis" in window)){
     alert("Your browser doesn't support text-to-speech. Try Chrome, Edge, or Safari.");
@@ -2510,6 +2523,22 @@ function speak(text){
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ar-SA";
   utter.rate = 0.75;
+  // Some browsers (Safari especially) don't reliably auto-pick a voice for a non-English
+  // lang from .lang alone and can fail silently — explicitly finding and assigning a matching
+  // voice is the standard fix. Falls back to whatever the browser defaults to if none found.
+  refreshVoiceCache();
+  const arVoice = _cachedVoices.find(v=>v.lang && v.lang.toLowerCase().startsWith("ar"));
+  if(arVoice) utter.voice = arVoice;
+  utter.onerror = (e)=>{
+    // "interrupted"/"canceled" are expected whenever a new word is tapped before the last one
+    // finished — not a real failure, so only surface genuine problems.
+    if(e.error !== "interrupted" && e.error !== "canceled"){
+      console.warn("Speech synthesis error:", e.error);
+      if(_voicesLoaded && _cachedVoices.length===0){
+        showToast("No text-to-speech voices are installed on this device — check your system/browser's language & voice settings.");
+      }
+    }
+  };
   _currentUtterance = utter;
   window.speechSynthesis.speak(utter);
 }
@@ -2780,15 +2809,27 @@ function statusBadgeHtml(status){
 }
 
 /* ============================= MASTERY CHECKPOINT ============================= */
-// Every 3 words that get promoted to "mastered" (vocab/Categories only — sentences have no
-// mastery concept), the app requires a short verified review of exactly those 3 words before
-// any further new practice can start. This exists specifically to catch the case the person
-// asked about directly: someone rubber-stamping "Got it" on Flashcards without really
-// retaining anything. Since only verified promotions reach "mastered" at all (see markResult),
-// this checkpoint is really testing "does it hold up a second time," not first-time luck.
+// Every 3 FULLY MASTERED CATEGORIES (all words across all its subcategories reach
+// "mastered") triggers a mandatory review of a sample of words from those 3 categories,
+// before any further new vocab practice can start. Sentences are never gated (they have no
+// mastery concept). Since a word can only reach "mastered" via a verified check in the first
+// place (see markResult), this checkpoint is confirming retention holds up a second time.
+//
+// masteredCategoryIds tracks every category ID that has EVER been counted toward a
+// checkpoint, so a category is never double-counted even if you leave and come back to it.
+// pendingReviewCategoryIds queues categories that have been counted but not yet reviewed —
+// once it reaches 3, the checkpoint fires and consumes exactly the oldest 3.
+//
+// Crucially, scanForNewlyMasteredCategories() runs on every app load AND after every
+// markResult call, and checks ALL 49 categories against masteredCategoryIds — so a category
+// that was already fully mastered before this feature ever existed gets picked up and queued
+// exactly as if it had just been completed. Nothing about this depends on when the mastery
+// happened; it only depends on the category's CURRENT status not having been counted yet.
 const CHECKPOINT_EVERY = 3;
-const CHECKPOINT_KEY = "mastery-checkpoint-v1";
-let pendingReviewWordIds = [];
+const WORDS_PER_CHECKPOINT_CATEGORY = 5;
+const CHECKPOINT_KEY = "mastery-checkpoint-v2";
+let masteredCategoryIds = new Set();
+let pendingReviewCategoryIds = [];
 let checkpointState = null;
 async function loadCheckpointState(){
   try{
@@ -2801,36 +2842,59 @@ async function loadCheckpointState(){
     } else if(_memoryStore[CHECKPOINT_KEY]){
       raw = _memoryStore[CHECKPOINT_KEY];
     }
-    if(raw) pendingReviewWordIds = JSON.parse(raw);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      masteredCategoryIds = new Set(parsed.masteredCategoryIds || []);
+      pendingReviewCategoryIds = parsed.pendingReviewCategoryIds || [];
+    }
   }catch(e){ /* none yet */ }
 }
 async function saveCheckpointStateNow(){
-  const json = JSON.stringify(pendingReviewWordIds);
+  const json = JSON.stringify({ masteredCategoryIds: Array.from(masteredCategoryIds), pendingReviewCategoryIds });
   try{
     if(STORAGE_BACKEND === "claude") await window.storage.set(CHECKPOINT_KEY, json, false);
     else if(STORAGE_BACKEND === "local") localStorage.setItem(CHECKPOINT_KEY, json);
     else _memoryStore[CHECKPOINT_KEY] = json;
   }catch(e){ console.warn("Checkpoint state save failed", e); }
 }
-function trackMasteryForCheckpoint(word){
-  if(!pendingReviewWordIds.includes(word.id)){
-    pendingReviewWordIds.push(word.id);
-    saveCheckpointStateNow();
-  }
+// Catches BOTH newly-completed categories AND ones that were already fully mastered before
+// this feature existed — both cases look identical from here: "full status, not yet counted."
+function scanForNewlyMasteredCategories(){
+  let changed = false;
+  DATA.categories.forEach(cat=>{
+    if(masteredCategoryIds.has(cat.id)) return;
+    if(getCatStatus(cat) === "full"){
+      masteredCategoryIds.add(cat.id);
+      if(!pendingReviewCategoryIds.includes(cat.id)) pendingReviewCategoryIds.push(cat.id);
+      changed = true;
+    }
+  });
+  if(changed) saveCheckpointStateNow();
 }
 // Returns true (and redirects into the checkpoint) if practice should be blocked right now.
 // Call this at the top of every function that starts a new vocab practice session.
+// This deliberately does NOT re-scan here — scanForNewlyMasteredCategories() already runs
+// immediately whenever a word is actually promoted (markResult, markWordAsKnown) and once on
+// app load, so pendingReviewCategoryIds is always already current by the time this checks it.
+// Scanning again here would mean re-walking every category/subcategory/word on every single
+// click into Flashcards/Quiz/etc. — pure wasted work that was making practice feel sluggish.
 function checkpointGate(){
-  if(pendingReviewWordIds.length >= CHECKPOINT_EVERY){
+  if(pendingReviewCategoryIds.length >= CHECKPOINT_EVERY){
     startMasteryCheckpoint();
     return true;
   }
   return false;
 }
 function startMasteryCheckpoint(){
-  const words = pendingReviewWordIds.map(id=>WORDS_BY_ID[id]).filter(Boolean);
-  if(words.length === 0){ pendingReviewWordIds = []; saveCheckpointStateNow(); return; }
-  checkpointState = { words, i:0, score:0, answered:false, options:null, direction:null };
+  const dueCatIds = pendingReviewCategoryIds.slice(0, CHECKPOINT_EVERY);
+  const dueCats = dueCatIds.map(id=>DATA.categories.find(c=>c.id===id)).filter(Boolean);
+  if(dueCats.length === 0){ pendingReviewCategoryIds = []; saveCheckpointStateNow(); return; }
+  const words = [];
+  dueCats.forEach(cat=>{
+    const catWords = cat.subs.flatMap(s=>s.words);
+    words.push(...shuffle(catWords).slice(0, WORDS_PER_CHECKPOINT_CATEGORY));
+  });
+  checkpointState = { catIds: dueCatIds, catNames: dueCats.map(c=>c.en), words: shuffle(words), i:0, score:0, answered:false, options:null, direction:null };
   nextCheckpointQuestion();
 }
 function nextCheckpointQuestion(){
@@ -2850,8 +2914,8 @@ function renderMasteryCheckpoint(){
     <div class="checkpoint-banner">
       <div class="checkpoint-banner-icon">🔒</div>
       <div>
-        <div class="checkpoint-banner-title">Quick mastery check</div>
-        <div class="checkpoint-banner-sub">You've mastered ${CHECKPOINT_EVERY} more words — confirm you've actually got them before continuing. Word ${checkpointState.i+1} of ${checkpointState.words.length}.</div>
+        <div class="checkpoint-banner-title">Mandatory review — 3 categories mastered</div>
+        <div class="checkpoint-banner-sub">You've fully mastered ${CHECKPOINT_EVERY} categories (${checkpointState.catNames.join(", ")}) — confirm it's actually retained before continuing. Question ${checkpointState.i+1} of ${checkpointState.words.length}.</div>
       </div>
     </div>
     <div class="quiz-wrap">
@@ -2902,7 +2966,10 @@ function renderMasteryCheckpoint(){
 function finishMasteryCheckpoint(){
   const finalScore = checkpointState.score;
   const total = checkpointState.words.length;
-  pendingReviewWordIds = [];
+  // Only remove the 3 categories that were actually just reviewed — if more had piled up
+  // (e.g. someone completed 5 categories in one sitting before ever hitting the gate), the
+  // remainder stays queued and will trigger its own checkpoint once it reaches 3 again.
+  pendingReviewCategoryIds = pendingReviewCategoryIds.filter(id=>!checkpointState.catIds.includes(id));
   saveCheckpointStateNow();
   main.innerHTML = `
     <div class="quiz-wrap">
@@ -3026,17 +3093,18 @@ function markResult(word, correct, verified){
   p.seen++;
   p.lastSeen = Date.now();
   let demoted = false;
+  let justMastered = false;
   if(correct){
     p.correct++;
     p.streak++;
     if(p.status==="shaky"){
       p.popQuizPending = Math.max(0, p.popQuizPending-1);
-      if(p.popQuizPending===0 && verified){ p.status="mastered"; p.masteredAt=Date.now(); p.streak=0; trackMasteryForCheckpoint(word); }
+      if(p.popQuizPending===0 && verified){ p.status="mastered"; p.masteredAt=Date.now(); p.streak=0; justMastered=true; }
     } else if(p.status!=="mastered"){
       if(p.streak>=MASTERY_STREAK && verified){
         p.status = "mastered";
         p.masteredAt = Date.now();
-        trackMasteryForCheckpoint(word);
+        justMastered = true;
       } else {
         p.status = "learning";
       }
@@ -3072,6 +3140,9 @@ function markResult(word, correct, verified){
 
   PROGRESS[id] = p;
   saveProgress();
+  // Only scan for newly-completed categories AFTER the write above, so the category-status
+  // check actually sees this word's updated status instead of its stale pre-update value.
+  if(justMastered) scanForNewlyMasteredCategories();
   return {demoted, progress:p};
 }
 
@@ -3110,6 +3181,9 @@ function markSubcategoryAsKnown(sub){
   if(toMark === 0){ showToast(`Every word in "${sub.en}" is already marked mastered.`); return; }
   showConfirm(`Mark all ${sub.words.length} words in "${sub.en}" as already known? This skips practice and marks them mastered immediately — you can always demote one later by getting it wrong in a quiz or flashcard session.`, ()=>{
     sub.words.forEach(w=>markWordAsKnown(w));
+    // One scan for the whole batch, not one per word — markWordAsKnown bypasses markResult,
+    // so nothing else would otherwise notice a category completing via this bulk action.
+    scanForNewlyMasteredCategories();
     showToast(`Marked ${toMark} word${toMark===1?"":"s"} in "${sub.en}" as known.`);
     activeRerender();
   });
@@ -4414,6 +4488,7 @@ function renderFlashcard(){
     e.stopPropagation();
     pushFcHistory(w);
     markWordAsKnown(w);
+    scanForNewlyMasteredCategories();
     fcState.known++; fcState.i++; fcState.flipped = false; renderFlashcard();
   });
   document.getElementById("fcExitBtn").addEventListener("click", ()=>{
@@ -5440,11 +5515,11 @@ function renderHistory(){
 
 function exportProgress(){
   const payload = {
-    app:"mufradat", formatVersion:5, exportedAt:new Date().toISOString(),
+    app:"mufradat", formatVersion:6, exportedAt:new Date().toISOString(),
     wordCount:Object.keys(PROGRESS).length, progress:PROGRESS,
     streak:STREAK, lastActivity:LAST_ACTIVITY, visitedSubs:Array.from(VISITED_SUBS),
     visitedSentenceSubs:Array.from(VISITED_SENTENCE_SUBS), seenSentences:Array.from(SEEN_SENTENCE_IDS),
-    pendingReviewWordIds:pendingReviewWordIds
+    masteredCategoryIds:Array.from(masteredCategoryIds), pendingReviewCategoryIds:pendingReviewCategoryIds
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -5491,10 +5566,16 @@ function importProgressFile(file){
           payload.seenSentences.forEach(id=>SEEN_SENTENCE_IDS.add(id));
           await saveSeenSentencesNow();
         }
-        if(Array.isArray(payload.pendingReviewWordIds)){
-          payload.pendingReviewWordIds.forEach(id=>{ if(!pendingReviewWordIds.includes(id)) pendingReviewWordIds.push(id); });
+        if(Array.isArray(payload.masteredCategoryIds) || Array.isArray(payload.pendingReviewCategoryIds)){
+          (payload.masteredCategoryIds||[]).forEach(id=>masteredCategoryIds.add(id));
+          (payload.pendingReviewCategoryIds||[]).forEach(id=>{ if(!pendingReviewCategoryIds.includes(id)) pendingReviewCategoryIds.push(id); });
           await saveCheckpointStateNow();
         }
+        // After any import, re-scan against the freshly-merged progress — an imported backup
+        // can easily push a category over the mastery line that wasn't there before, and this
+        // makes sure that gets queued for review immediately rather than waiting on the next
+        // markResult call to notice it.
+        scanForNewlyMasteredCategories();
       }
       const importedCount = Object.keys(incoming).length;
       showToast(`Imported ${importedCount} words' progress (you now have ${Object.keys(PROGRESS).length} tracked total).`);
@@ -5723,6 +5804,7 @@ function render(){
   await loadVisitedSentenceSubs();
   await loadSeenSentences();
   await loadCheckpointState();
+  scanForNewlyMasteredCategories();
   render();
   initTimerWidget();
   if(state.view === "home") setTimeout(showWelcomeBackPopup, 500);
